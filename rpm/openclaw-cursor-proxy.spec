@@ -27,6 +27,7 @@ install -m 0755 %{_sourcedir}/setup-vm.sh %{buildroot}/usr/share/openclaw-cursor
 install -m 0755 %{_sourcedir}/monitor-dashboard.sh %{buildroot}/usr/share/openclaw-cursor/scripts/
 install -m 0755 %{_sourcedir}/openclaw-watchdog.sh %{buildroot}/usr/share/openclaw-cursor/scripts/
 install -m 0755 %{_sourcedir}/openclaw-wait-ready.sh %{buildroot}/usr/share/openclaw-cursor/scripts/
+install -m 0755 %{_sourcedir}/harden.sh %{buildroot}/usr/share/openclaw-cursor/scripts/
 
 %post
 systemctl daemon-reload

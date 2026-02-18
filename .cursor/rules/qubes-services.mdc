@@ -1,0 +1,50 @@
+---
+description: Qubes OS service management — qvm-service, systemd units, dom0 integration
+globs: ["**/qubes-integration/**", "**/*.service", "**/rpm/**"]
+---
+
+# Qubes-Managed OpenClaw Services
+
+Services use `ConditionPathExists=/var/run/qubes-service/<name>` so dom0 controls what runs via `qvm-service`.
+
+## Service lifecycle
+
+```
+dom0: qvm-service visyble openclaw-proxy on
+  → Creates /var/run/qubes-service/openclaw-proxy at boot
+  → qubes-openclaw-proxy.service sees ConditionPathExists → starts
+```
+
+## Available services
+
+| qvm-service name | VM | Unit | Port |
+|------------------|----|------|------|
+| `openclaw-proxy` | server | `qubes-openclaw-proxy` | 32125 |
+| `openclaw-gateway` | server | `qubes-openclaw-gateway` | 18789 |
+| `openclaw-watchdog` | server | `qubes-openclaw-watchdog` | — |
+| `openclaw-tunnels` | admin | `qubes-openclaw-tunnels` | — |
+
+## Unit file conventions
+
+- System-level (`/usr/lib/systemd/system/qubes-openclaw-*.service`)
+- Run as `User=user`
+- `After=qubes-sysinit.service` ensures service flags exist
+- `ExecStartPre` runs dependency checks via `openclaw-wait-ready.sh`
+- `SyslogIdentifier` matches service name for `journalctl --identifier=`
+
+## RPM vs dev paths
+
+- Dev: `ExecStart=/home/user/.npm-global/bin/openclaw gateway ...`
+- RPM: `ExecStart=/usr/bin/openclaw gateway ...`
+- RPM unit files live in `rpm/sources/qubes-openclaw-*.service`
+
+## CLI
+
+`openclaw-ctl` auto-detects server vs client role and probes correct units:
+
+```bash
+openclaw-ctl status       # health, ports, services
+openclaw-ctl health       # deep endpoint probes
+openclaw-ctl logs proxy   # journalctl + file logs
+openclaw-ctl restart gateway
+```

@@ -1,0 +1,53 @@
+---
+description: OpenClaw plugin system — install, configure, and develop plugins
+globs: ["**/plugins/**", "**/openclaw.json*"]
+---
+
+# OpenClaw Plugin System
+
+Plugins extend OpenClaw with channels, tools, voice, and background services. They run in-process with the gateway.
+
+## Install commands
+
+```bash
+openclaw plugins install @openclaw/matrix     # official npm plugin
+openclaw plugins install powermem             # community plugin
+openclaw plugins install github:User/Repo    # from GitHub
+openclaw plugins list                         # show loaded
+```
+
+## Config pattern
+
+Plugins are activated in `~/.openclaw/openclaw.json`:
+
+```json
+{
+  "plugins": ["@openclaw/matrix", "powermem"],
+  "matrix": { "homeserver": "...", "accessToken": "..." }
+}
+```
+
+Each plugin may add its own top-level config key.
+
+## Plugin types
+
+- **Channel**: messaging platform adapters (Matrix, Teams, Nostr, Telegram)
+- **Tool**: API/hardware integrations (PowerMem, Exoshell)
+- **Voice**: phone call providers (Twilio, Telnyx, Plivo)
+- **Background**: long-running services
+
+## Curated plugins for this setup
+
+| Plugin | Package | Purpose |
+|--------|---------|---------|
+| Matrix | `@openclaw/matrix` | Decentralized E2E-encrypted messaging |
+| PowerMem | `powermem` | Ebbinghaus-curve long-term memory |
+| MemOS Cloud | `github:MemTensor/MemOS-Cloud-OpenClaw-Plugin` | Cloud persistent context |
+| Voice Call | `@openclaw/voice-call` | Telephony via Twilio/Telnyx |
+| Exoshell | `exoshell` | Claude-powered dev utilities |
+
+## Security
+
+- Always review plugin source before install
+- ClawHub had a Feb 2026 malware incident — stick to high-star, known-author plugins
+- Matrix plugin supports E2E encryption, suitable for Qubes security posture

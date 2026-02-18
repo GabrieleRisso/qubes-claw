@@ -9,7 +9,7 @@
     "bind": "lan",
     "auth": {
       "mode": "token",
-      "token": "CHANGE_ME_GENERATE_WITH_openssl_rand_hex_32"
+      "token": "REPLACE_WITH_openssl_rand_hex_32"
     }
   },
 
@@ -58,7 +58,7 @@
 
   "hooks": {
     "enabled": true,
-    "token": "CHANGE_ME_GENERATE_WITH_openssl_rand_hex_32"
+    "token": "REPLACE_WITH_openssl_rand_hex_32"
   },
 
   "cron": {
@@ -75,7 +75,19 @@
     "pretty": true
   },
 
-  "plugins": [],
+  "plugins": [
+    "@openclaw/matrix",
+    "powermem"
+  ],
+
+  "matrix": {
+    "homeserver": "https://matrix.org",
+    "userId": "@your-bot:matrix.org",
+    "accessToken": "YOUR_MATRIX_TOKEN",
+    "allowedRooms": [],
+    "displayName": "OpenClaw",
+    "autoJoin": false
+  },
 
   "compaction": "safeguard"
 }

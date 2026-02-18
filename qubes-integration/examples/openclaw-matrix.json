@@ -1,0 +1,11 @@
+{
+  "plugins": ["@openclaw/matrix"],
+  "matrix": {
+    "homeserver": "https://matrix.org",
+    "userId": "@your-openclaw-bot:matrix.org",
+    "accessToken": "YOUR_MATRIX_ACCESS_TOKEN",
+    "allowedRooms": ["!your-room-id:matrix.org"],
+    "displayName": "OpenClaw Agent",
+    "autoJoin": false
+  }
+}

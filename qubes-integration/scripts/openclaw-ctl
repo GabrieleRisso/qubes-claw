@@ -335,6 +335,7 @@ cmd_help() {
     echo "  restart [component] Restart a service"
     echo "  cron [sub]          Manage cron jobs (list|add|remove)"
     echo "  webhook-test        Test webhook endpoint connectivity"
+    echo "  harden              Run security hardening checks"
     echo "  help                This message"
     echo ""
     echo "Qubes services (toggled from dom0):"
@@ -361,6 +362,19 @@ cmd_restart() {
     echo "Service openclaw-$target not found"
 }
 
+cmd_harden() {
+    local script_dir
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    if [ -x "$script_dir/harden.sh" ]; then
+        exec "$script_dir/harden.sh"
+    elif [ -x /usr/share/openclaw-cursor/scripts/harden.sh ]; then
+        exec /usr/share/openclaw-cursor/scripts/harden.sh
+    else
+        echo "harden.sh not found"
+        exit 1
+    fi
+}
+
 case "${1:-status}" in
     status)       cmd_status ;;
     health)       cmd_health ;;
@@ -369,6 +383,7 @@ case "${1:-status}" in
     restart)      cmd_restart "${2:-all}" ;;
     cron)         shift; cmd_cron "$@" ;;
     webhook-test) cmd_webhook_test ;;
+    harden)       cmd_harden ;;
     help|-h|--help) cmd_help ;;
     *)            echo "Unknown: $1"; cmd_help; exit 1 ;;
 esac

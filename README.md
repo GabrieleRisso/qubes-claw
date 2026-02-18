@@ -186,6 +186,24 @@ Everything auto-starts:
 - **Firewall**: Network mode uses Qubes firewall rules. Only allowed ports are open.
 - **No secrets in git**: API keys live in `~/.openclaw/openclaw.json` inside the VM. Example configs use `${PLACEHOLDER}` syntax.
 
+## Enhanced branch
+
+The `enhanced` branch adds curated plugins, skills, production config, and hardening on top of the vanilla `main`:
+
+| Layer | What | Install |
+|-------|------|---------|
+| **Config** | Runbook-grade cost controls, memory compaction, concurrency limits | `bash setup-config.sh` |
+| **Plugins** | Matrix, PowerMem, MemOS Cloud, Voice Call, Exoshell | `bash plugins/install-plugins.sh` |
+| **Skills** | Top ClawHub skills (self-improving-agent, capability-evolver) | `bash skills/install-skills.sh` |
+| **Hardening** | Security audit (tokens, bind, permissions, process user) | `openclaw-ctl harden` |
+
+Switch between branches:
+
+```bash
+git checkout main       # vanilla — safe default, always works
+git checkout enhanced   # batteries included — plugins, skills, hardening
+```
+
 ## Non-Qubes (Docker)
 
 ```bash

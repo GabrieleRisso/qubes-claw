@@ -1,0 +1,55 @@
+---
+description: Production OpenClaw config patterns — cost control, memory, concurrency
+globs: ["**/openclaw*.json*", "**/config/**"]
+---
+
+# OpenClaw Production Config Patterns
+
+Based on digitalknk/openclaw-runbook — tested patterns for sustainable operation.
+
+## Model routing (coordinator/worker)
+
+Use cheap capable models as coordinator, reserve expensive ones for fallback:
+
+```json
+"agents": {
+  "defaults": {
+    "model": { "primary": "cursor/auto", "fallback": "cursor/auto" },
+    "maxConcurrent": 4,
+    "subagents": { "maxConcurrent": 8 }
+  }
+}
+```
+
+## Memory compaction
+
+Prevent token blowout with cache-ttl pruning:
+
+```json
+"memory": {
+  "enabled": true,
+  "embeddings": { "model": "text-embedding-3-small" },
+  "compaction": {
+    "mode": "cache-ttl",
+    "softThresholdTokens": 40000,
+    "cacheTtlHours": 6
+  }
+}
+```
+
+- `text-embedding-3-small` costs ~$0.10 per thousands of searches
+- `softThresholdTokens` at 40k triggers distillation into markdown memory files
+- `cacheTtlHours` at 6 keeps prompt cache valid, drops stale messages
+
+## Cost controls
+
+- `maxConcurrent: 4` prevents quota burnout from cascading retries
+- Heartbeat uses cheapest model (~$0.005/day vs $0.24/day for premium)
+- Expected monthly cost with optimization: ~$45-50
+
+## Security
+
+- Bind gateway to loopback for local-only, or `lan` behind ConnectTCP
+- Generate 256-bit tokens: `openssl rand -hex 32`
+- Rotate tokens quarterly
+- Use `compaction: "safeguard"` to prevent accidental data loss

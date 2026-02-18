@@ -143,6 +143,7 @@ openclaw-ctl follow [component]  # Tail logs in real time
 openclaw-ctl restart [component] # Restart a service
 openclaw-ctl cron [list|add|remove]  # Manage scheduled tasks
 openclaw-ctl webhook-test    # Test webhook endpoint
+openclaw-ctl harden          # Security audit
 ```
 
 ## Features (openclaw.json)
@@ -150,6 +151,10 @@ openclaw-ctl webhook-test    # Test webhook endpoint
 Copy the template to get started:
 
 ```bash
+# Auto-generate with random tokens:
+bash qubes-integration/scripts/setup-config.sh
+
+# Or copy manually:
 cp qubes-integration/config/openclaw.json.template ~/.openclaw/openclaw.json
 # Edit tokens: replace CHANGE_ME values with output of `openssl rand -hex 32`
 ```
@@ -180,8 +185,30 @@ cp qubes-integration/config/openclaw.json.template ~/.openclaw/openclaw.json
 - Gateway uses token auth: set `gateway.auth.token` in `~/.openclaw/openclaw.json`
 - No `qubes-network-server` needed (no LAN exposure)
 
+## Plugins (enhanced branch)
+
+Curated plugins for the Qubes + OpenClaw setup:
+
+```bash
+bash qubes-integration/plugins/install-plugins.sh            # all plugins
+bash qubes-integration/plugins/install-plugins.sh matrix      # just Matrix
+```
+
+See `qubes-integration/plugins/README.md` for config examples.
+
+## Skills (enhanced branch)
+
+Top ClawHub skills:
+
+```bash
+bash qubes-integration/skills/install-skills.sh
+```
+
 ## Links
 
 - [openclaw-cursor proxy](https://github.com/GabrieleRisso/openclaw-cursor)
 - [OpenClaw docs](https://docs.openclaw.ai/)
 - [qubes.ConnectTCP docs](https://www.qubes-os.org/doc/qrexec/)
+- [digitalknk/openclaw-runbook](https://github.com/digitalknk/openclaw-runbook) -- production config patterns
+- [VoltAgent/awesome-openclaw-skills](https://github.com/VoltAgent/awesome-openclaw-skills) -- curated skills
+- [PatrickJS/awesome-cursorrules](https://github.com/PatrickJS/awesome-cursorrules) -- cursor rules collection
