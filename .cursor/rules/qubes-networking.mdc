@@ -1,5 +1,5 @@
 ---
-description: Qubes OS networking model and qubes-network-server integration
+description: Qubes OS networking and qubes.ConnectTCP for cross-VM access
 alwaysApply: true
 ---
 
@@ -7,31 +7,34 @@ alwaysApply: true
 
 ## Default model
 
-- VMs are client-only; NetVM masquerades outbound traffic, blocks inbound
-- VMs get IPs in 10.137.x.x range, not reachable from LAN
+- VMs are client-only; NetVM masquerades outbound, blocks inbound
+- VMs get IPs in 10.137.x.x range, not routable from other VMs
 
-## qubes-network-server
+## qubes.ConnectTCP (preferred)
 
-Extends Qubes so VMs can act as network servers (receive inbound traffic).
+Built-in qrexec service for safe TCP tunnelling between VMs. No network routing changes needed.
 
 ### How it works
 
-1. **Dom0**: Extension writes `routing-method=forward` per VM IP into NetVM's Qubes DB
-2. **NetVM**: `qubes-routing-manager` daemon reads DB, configures:
-   - **nftables**: forward + postrouting accept rules (skip masquerade)
-   - **Proxy ARP/NDP**: NetVM answers ARP for server VM IPs on LAN
+1. **Dom0 policy** allows specific VMs to connect to specific ports on a target VM
+2. **Client VM** runs `qvm-connect-tcp <local-port>:<target-vm>:<remote-port>`
+3. Traffic goes through **Xen vchan** (not the network stack) — fully isolated
 
-### Enable a server VM
+### Dom0 policy example
 
-```bash
-qvm-features <vm-name> routing-method forward
+```
+# /etc/qubes/policy.d/50-openclaw.policy
+qubes.ConnectTCP +32125 @anyvm openclaw-vm allow
+qubes.ConnectTCP +18789 @anyvm openclaw-vm allow
 ```
 
-### Key packages
+### Client usage
 
-- `qubes-core-admin-addon-network-server` (dom0)
-- `qubes-network-server` (NetVM template)
+```bash
+qvm-connect-tcp 32125:openclaw-vm:32125
+curl http://localhost:32125/health
+```
 
 ### For OpenClaw integration
 
-The OpenClaw gateway VM needs `routing-method forward` so other VMs and LAN hosts can reach port 18789 (gateway) and 32125 (cursor proxy). The NetVM must have `qubes-network-server` installed.
+The server VM runs proxy (:32125) and gateway (:18789). Client VMs use `qubes.ConnectTCP` to get local tunnels. No firewall holes, no IP forwarding, no qubes-network-server.

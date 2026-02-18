@@ -1,64 +1,48 @@
 # qubes-claw
 
-OpenClaw + Cursor Pro proxy + Qubes OS networking. Run AI agents on Qubes with proper VM isolation and network server routing.
+OpenClaw + Cursor Pro proxy on Qubes OS. Safe cross-VM AI agents via `qubes.ConnectTCP`.
 
-## What's in here
+## Layout
 
 ```
 qubes-claw/
 ├── openclaw/              # openclaw-cursor proxy (Go)
-│   ├── Dockerfile         # Docker containerized deployment
-│   ├── docker-compose.yml
-│   └── ...
-├── qubes-integration/     # Qubes OS networking + systemd
+├── qubes-integration/     # Qubes setup scripts + systemd
 │   ├── scripts/
-│   │   ├── setup-dom0.sh  # Run in dom0: create VM, enable routing
-│   │   └── setup-vm.sh    # Run in VM: install everything
-│   ├── systemd/           # Auto-start services
-│   └── README.md
-├── qubes-network-server/  # Upstream qubes-network-server (submodule)
-└── .cursor/rules/         # Cursor AI rules for this workspace
+│   │   ├── setup-dom0.sh      # dom0: create VM + ConnectTCP policy
+│   │   ├── setup-vm.sh        # server VM: install everything
+│   │   └── client-connect.sh  # client VM: open qrexec tunnels
+│   └── systemd/               # auto-start units
+└── .cursor/rules/         # Cursor AI context rules
 ```
 
-## Quick start
-
-### Qubes OS
+## Quick start — Qubes OS
 
 ```bash
-# 1. In dom0: create VM with server networking
-bash setup-dom0.sh openclaw-vm fedora-41 sys-net
+# 1. dom0: create VM + policy
+bash setup-dom0.sh openclaw-vm
 
-# 2. In the VM: install everything
-bash setup-vm.sh
+# 2. server VM: install
+qvm-run -p openclaw-vm 'bash setup-vm.sh'
 
-# 3. Log in and start
-openclaw-cursor login
-openclaw-cursor start &
-openclaw gateway --port 18789
+# 3. server VM: auth + start
+qvm-run -p openclaw-vm 'openclaw-cursor login && openclaw-cursor start & openclaw gateway --port 18789 &'
+
+# 4. client VM: connect via qrexec
+bash client-connect.sh openclaw-vm
+curl http://localhost:32125/health
 ```
 
-### Any Linux / macOS / Windows
+## Quick start — Any OS (Docker)
 
 ```bash
-git clone https://github.com/GabrieleRisso/qubes-claw.git
-cd qubes-claw/openclaw
+git clone https://github.com/GabrieleRisso/openclaw-cursor.git
+cd openclaw-cursor
 docker compose up -d
 ```
 
-## Cursor rules
-
-The `.cursor/rules/` directory contains AI rules for this workspace:
-
-| Rule | Scope | Description |
-|------|-------|-------------|
-| `openclaw-overview.mdc` | Always | OpenClaw architecture, config, tools |
-| `qubes-networking.mdc` | Always | Qubes OS network model + server setup |
-| `cursor-proxy-go.mdc` | `*.go` files | Go conventions for the proxy |
-| `docker-integration.mdc` | Docker files | Container build + auth patterns |
-
 ## Links
 
-- [openclaw-cursor proxy](openclaw/)
+- [openclaw-cursor proxy](https://github.com/GabrieleRisso/openclaw-cursor)
 - [Qubes integration](qubes-integration/)
 - [OpenClaw docs](https://docs.openclaw.ai/)
-- [qubes-network-server](https://github.com/Rudd-O/qubes-network-server)

@@ -1,100 +1,85 @@
-# Qubes OS + OpenClaw + Cursor Proxy Integration
+# Qubes OS + OpenClaw + Cursor Proxy
 
-Run OpenClaw and the Cursor proxy inside a Qubes OS VM, with proper networking so other VMs and LAN hosts can reach the gateway and proxy.
+Run OpenClaw and the Cursor proxy inside a Qubes VM. Other VMs connect safely through `qubes.ConnectTCP` (qrexec) -- no raw network routing needed.
 
 ## Architecture
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │ dom0                                                         │
-│   qvm-features openclaw-vm routing-method forward            │
+│   Adds qubes.ConnectTCP policy for openclaw-vm               │
 └──────────────────────────────────────────────────────────────┘
-        │ writes routing-method to NetVM Qubes DB
+        │ qrexec policy controls which VMs can connect
         ▼
 ┌──────────────────────────────────────────────────────────────┐
-│ sys-net (NetVM)                                              │
-│   qubes-routing-manager → nftables forward + proxy ARP       │
-└──────────────────────────────────────────────────────────────┘
-        │ forwards traffic to/from openclaw-vm
-        ▼
-┌──────────────────────────────────────────────────────────────┐
-│ openclaw-vm (AppVM)                                          │
+│ openclaw-vm (AppVM) — server                                 │
 │                                                              │
 │   openclaw-cursor proxy  (:32125)  ← OpenAI-compatible API  │
 │   openclaw gateway       (:18789)  ← Dashboard + WebSocket  │
 │   cursor-agent           (spawned per request)               │
+└──────────────────────────────────────────────────────────────┘
+        ▲ qubes.ConnectTCP tunnel (secure qrexec)
+        │
+┌──────────────────────────────────────────────────────────────┐
+│ client-vm (any AppVM)                                        │
 │                                                              │
-│   Reachable from:                                            │
-│     - Other Qubes VMs on same NetVM                          │
-│     - LAN hosts (via proxy ARP)                              │
+│   localhost:32125 → tunnelled to openclaw-vm:32125           │
+│   localhost:18789 → tunnelled to openclaw-vm:18789           │
 └──────────────────────────────────────────────────────────────┘
 ```
 
 ## Prerequisites
 
 - Qubes OS 4.2+
-- `qubes-network-server` installed in NetVM template
-- `qubes-core-admin-addon-network-server` installed in dom0
-- Node 22+, Go 1.22+ in the AppVM (or use Docker)
+- Node 22+, Go 1.22+ in the server AppVM (or Docker)
 
 ## Setup
 
-### 1. Install qubes-network-server (one-time)
-
-**In dom0:**
+### 1. Dom0: create VM and allow ConnectTCP
 
 ```bash
-sudo qubes-dom0-update qubes-core-admin-addon-network-server
+# Run from dom0 (or copy-paste the commands)
+bash setup-dom0.sh openclaw-vm fedora-41 sys-net
 ```
 
-**In NetVM template (e.g. fedora-41):**
+This creates the VM and writes a `qubes.ConnectTCP` policy so other VMs can reach ports 32125 and 18789 through qrexec.
+
+### 2. Server VM: install everything
 
 ```bash
-sudo dnf install qubes-network-server
+# Inside openclaw-vm
+bash setup-vm.sh
 ```
 
-Then restart the NetVM.
-
-### 2. Create the OpenClaw VM
+Or with `qvm-run` from dom0:
 
 ```bash
-# In dom0
-qvm-create openclaw-vm --class AppVM --template fedora-41 --label orange
-qvm-prefs openclaw-vm netvm sys-net
+qvm-run -p openclaw-vm 'curl -fsSL https://raw.githubusercontent.com/GabrieleRisso/openclaw-cursor/main/qubes-integration/scripts/setup-vm.sh | bash'
 ```
 
-### 3. Enable server networking
+### 3. Server VM: authenticate and start
 
 ```bash
-# In dom0 — makes the VM reachable from LAN and other VMs
-qvm-features openclaw-vm routing-method forward
+openclaw-cursor login
+openclaw-cursor start &
+openclaw gateway --port 18789
 ```
 
-### 4. Set a static IP (optional but recommended)
+### 4. Client VM: connect
 
 ```bash
-# In dom0
-qvm-prefs openclaw-vm ip 10.137.0.100
+# From any other AppVM — opens safe qrexec tunnels
+bash client-connect.sh openclaw-vm
 ```
 
-### 5. Allow inbound ports in Qubes firewall
+This creates `localhost:32125` and `localhost:18789` tunnels to the server VM. Then:
 
 ```bash
-# In dom0
-qvm-firewall openclaw-vm add --before 0 action=accept dstports=32125 proto=tcp
-qvm-firewall openclaw-vm add --before 0 action=accept dstports=18789 proto=tcp
+curl http://localhost:32125/health
+xdg-open http://localhost:18789/
 ```
 
-### 6. Install and start (inside openclaw-vm)
-
-#### Option A: From source
-
-```bash
-# Run the setup script
-curl -fsSL https://raw.githubusercontent.com/GabrieleRisso/qubes-claw/main/qubes-integration/scripts/setup-vm.sh | bash
-```
-
-#### Option B: Docker
+### 5. Docker alternative (server VM)
 
 ```bash
 git clone https://github.com/GabrieleRisso/openclaw-cursor.git
@@ -102,37 +87,30 @@ cd openclaw-cursor
 docker compose up -d
 ```
 
-### 7. Access from other VMs
-
-From any VM on the same NetVM:
-
-```bash
-# Health check
-curl http://10.137.0.100:32125/health
-
-# Chat completion
-curl http://10.137.0.100:32125/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -d '{"model":"cursor/auto","messages":[{"role":"user","content":"hello"}]}'
-
-# Dashboard (open in browser)
-xdg-open http://10.137.0.100:18789/
-```
-
-## Systemd services
-
-Install the systemd units for auto-start:
+## Systemd auto-start
 
 ```bash
 sudo cp systemd/*.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable --now openclaw-cursor-proxy.service
-sudo systemctl enable --now openclaw-gateway.service
+sudo systemctl enable --now openclaw-cursor-proxy openclaw-gateway
 ```
 
-## Security notes
+## How qubes.ConnectTCP works
 
-- The proxy uses your Cursor auth — do NOT expose port 32125 beyond your trusted network
-- Use `qvm-firewall` to restrict which VMs/IPs can reach the proxy
-- OpenClaw gateway supports token auth: set `gateway.auth.token` in `~/.openclaw/openclaw.json`
-- For remote access beyond LAN, use Tailscale or SSH tunnels
+`qubes.ConnectTCP` is Qubes' built-in secure TCP forwarding over qrexec. It tunnels TCP connections between VMs through dom0's qrexec policy engine -- no network routing, no firewall holes, no IP forwarding.
+
+Dom0 policy controls exactly which source VMs can connect to which ports on which target VMs. All traffic goes through the Xen vchan (not the network stack).
+
+## Security
+
+- Traffic between VMs goes through qrexec (Xen vchan), not the network
+- Dom0 policy whitelists specific VMs and ports -- deny by default
+- The proxy uses your Cursor auth -- restrict access to trusted VMs only
+- Gateway supports token auth: set `gateway.auth.token` in `~/.openclaw/openclaw.json`
+- No `qubes-network-server` needed (no LAN exposure)
+
+## Links
+
+- [openclaw-cursor proxy](https://github.com/GabrieleRisso/openclaw-cursor)
+- [OpenClaw docs](https://docs.openclaw.ai/)
+- [qubes.ConnectTCP docs](https://www.qubes-os.org/doc/qrexec/#extracting-specific-connecttcp)

@@ -3,58 +3,54 @@ set -euo pipefail
 
 # ---------------------------------------------------------------------------
 # setup-dom0.sh — Configure dom0 for OpenClaw server VM
+# Uses qubes.ConnectTCP for safe cross-VM access (no qubes-network-server)
 # Run in dom0 ONLY
 # ---------------------------------------------------------------------------
 
 VM_NAME="${1:-openclaw-vm}"
 TEMPLATE="${2:-fedora-41}"
 NETVM="${3:-sys-net}"
-IP="${4:-10.137.0.100}"
 
 echo "=== Qubes dom0 setup for OpenClaw ==="
 echo "VM:       $VM_NAME"
 echo "Template: $TEMPLATE"
 echo "NetVM:    $NETVM"
-echo "IP:       $IP"
 echo ""
 
-# 1. Install dom0 addon (if not already)
-if ! rpm -q qubes-core-admin-addon-network-server &>/dev/null; then
-    echo "[1/5] Installing qubes-core-admin-addon-network-server..."
-    sudo qubes-dom0-update qubes-core-admin-addon-network-server
-else
-    echo "[1/5] Dom0 addon already installed"
-fi
-
-# 2. Create VM if it doesn't exist
+# 1. Create VM
 if ! qvm-check "$VM_NAME" &>/dev/null; then
-    echo "[2/5] Creating VM: $VM_NAME"
+    echo "[1/4] Creating VM: $VM_NAME"
     qvm-create "$VM_NAME" --class AppVM --template "$TEMPLATE" --label orange
     qvm-prefs "$VM_NAME" netvm "$NETVM"
 else
-    echo "[2/5] VM $VM_NAME already exists"
+    echo "[1/4] VM $VM_NAME already exists"
 fi
 
-# 3. Set static IP
-echo "[3/5] Setting IP to $IP"
-qvm-prefs "$VM_NAME" ip "$IP"
+# 2. Allow outbound (VM needs internet to install packages and for cursor-agent)
+echo "[2/4] Ensuring outbound connectivity"
+qvm-prefs "$VM_NAME" netvm "$NETVM"
 
-# 4. Enable server networking
-echo "[4/5] Enabling routing-method forward"
-qvm-features "$VM_NAME" routing-method forward
+# 3. Write qubes.ConnectTCP policy — allow all VMs to reach proxy + gateway
+POLICY_DIR="/etc/qubes/policy.d"
+POLICY_FILE="$POLICY_DIR/50-openclaw.policy"
 
-# 5. Open firewall ports
-echo "[5/5] Adding firewall rules for ports 32125 and 18789"
-qvm-firewall "$VM_NAME" add --before 0 action=accept dstports=32125 proto=tcp 2>/dev/null || true
-qvm-firewall "$VM_NAME" add --before 0 action=accept dstports=18789 proto=tcp 2>/dev/null || true
+echo "[3/4] Writing ConnectTCP policy to $POLICY_FILE"
+cat > "$POLICY_FILE" <<EOF
+# OpenClaw: allow VMs to connect to proxy (32125) and gateway (18789) on $VM_NAME
+qubes.ConnectTCP +32125 @anyvm $VM_NAME allow
+qubes.ConnectTCP +18789 @anyvm $VM_NAME allow
+EOF
+
+echo "[4/4] Policy written. Verifying..."
+cat "$POLICY_FILE"
 
 echo ""
 echo "=== Dom0 setup complete ==="
 echo ""
-echo "Next: Start the VM and run the VM setup script inside it:"
-echo "  qvm-start $VM_NAME"
-echo "  qvm-run $VM_NAME 'curl -fsSL https://raw.githubusercontent.com/GabrieleRisso/qubes-claw/main/qubes-integration/scripts/setup-vm.sh | bash'"
+echo "Next steps:"
+echo "  1. Start the VM:   qvm-start $VM_NAME"
+echo "  2. Install inside:  qvm-run -p $VM_NAME 'curl -fsSL https://raw.githubusercontent.com/GabrieleRisso/openclaw-cursor/main/qubes-integration/scripts/setup-vm.sh | bash'"
 echo ""
-echo "Access from other VMs:"
-echo "  curl http://$IP:32125/health"
-echo "  xdg-open http://$IP:18789/"
+echo "From any client VM:"
+echo "  qvm-connect-tcp 32125:$VM_NAME:32125"
+echo "  curl http://localhost:32125/health"

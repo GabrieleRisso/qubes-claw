@@ -3,69 +3,68 @@ set -euo pipefail
 
 # ---------------------------------------------------------------------------
 # setup-vm.sh — Install OpenClaw + cursor proxy inside a Qubes AppVM
-# Run inside the target VM (not dom0)
+# Source: https://github.com/GabrieleRisso/openclaw-cursor
 # ---------------------------------------------------------------------------
 
-echo "=== OpenClaw + Cursor Proxy — Qubes VM Setup ==="
+echo "=== OpenClaw + Cursor Proxy — VM Setup ==="
 echo ""
 
-# Check we're in a Qubes VM
-if [ ! -f /usr/share/qubes/marker-vm ]; then
-    echo "WARNING: This doesn't look like a Qubes VM. Continuing anyway..."
+if [ -f /usr/share/qubes/marker-vm ]; then
+    VM_NAME=$(qubesdb-read /name 2>/dev/null || echo "unknown")
+    echo "Qubes VM: $VM_NAME ($(qubesdb-read /qubes-vm-type 2>/dev/null || echo 'unknown type'))"
+else
+    echo "WARNING: Not a Qubes VM. Continuing anyway..."
 fi
+echo ""
 
 export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
 
-# 1. Install cursor-agent
+# 1. cursor-agent
 if ! command -v cursor-agent &>/dev/null && ! command -v agent &>/dev/null; then
-    echo "[1/5] Installing cursor-agent..."
+    echo "[1/6] Installing cursor-agent..."
     curl -fsSL https://cursor.com/install | bash
 else
-    echo "[1/5] cursor-agent already installed"
+    echo "[1/6] cursor-agent OK"
 fi
 
-# 2. Install OpenClaw
+# 2. OpenClaw
 if ! command -v openclaw &>/dev/null; then
-    echo "[2/5] Installing OpenClaw..."
+    echo "[2/6] Installing OpenClaw..."
     curl -fsSL https://openclaw.ai/install.sh | bash 2>&1 || true
-    echo 'export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"' >> ~/.bashrc
+    grep -q 'npm-global' ~/.bashrc 2>/dev/null || \
+        echo 'export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"' >> ~/.bashrc
 else
-    echo "[2/5] OpenClaw already installed ($(openclaw --version))"
+    echo "[2/6] OpenClaw OK ($(openclaw --version))"
 fi
 
-# 3. Check for Go
+# 3. Go
 if ! command -v go &>/dev/null; then
-    echo "[3/5] Go not found. Installing..."
+    echo "[3/6] Installing Go..."
     sudo dnf install -y golang 2>/dev/null || sudo apt-get install -y golang 2>/dev/null || {
-        echo "ERROR: Cannot install Go. Install manually from https://go.dev/dl/"
+        echo "ERROR: Cannot install Go. See https://go.dev/dl/"
         exit 1
     }
 else
-    echo "[3/5] Go already installed ($(go version))"
+    echo "[3/6] Go OK ($(go version | awk '{print $3}'))"
 fi
 
-# 4. Clone and build the proxy
+# 4. Clone and build proxy
 REPO_DIR="$HOME/openclaw-cursor"
+echo "[4/6] Building proxy..."
 if [ ! -d "$REPO_DIR" ]; then
-    echo "[4/5] Cloning and building openclaw-cursor proxy..."
     git clone https://github.com/GabrieleRisso/openclaw-cursor.git "$REPO_DIR"
-    cd "$REPO_DIR"
-    make build
-    make install-local
-else
-    echo "[4/5] Proxy already cloned at $REPO_DIR"
-    cd "$REPO_DIR"
-    make build
-    make install-local
 fi
+cd "$REPO_DIR"
+git pull --ff-only 2>/dev/null || true
+make build
+make install-local
 
-# 5. Generate configs
-echo "[5/5] Generating configs..."
+# 5. Configs
+echo "[5/6] Generating configs..."
 mkdir -p ~/.openclaw/logs ~/.openclaw/agents/main/agent ~/.openclaw/skills
 
-# Proxy config
 if [ ! -f ~/.openclaw/cursor-proxy.json ]; then
-    cat > ~/.openclaw/cursor-proxy.json <<'EOF'
+    cat > ~/.openclaw/cursor-proxy.json <<'CONF'
 {
   "port": 32125,
   "log_level": "info",
@@ -74,12 +73,11 @@ if [ ! -f ~/.openclaw/cursor-proxy.json ]; then
   "default_model": "auto",
   "enable_thinking": true
 }
-EOF
+CONF
 fi
 
-# OpenClaw config
 if [ ! -f ~/.openclaw/openclaw.json ]; then
-    cat > ~/.openclaw/openclaw.json <<'EOF'
+    cat > ~/.openclaw/openclaw.json <<'CONF'
 {
   "gateway": { "mode": "local", "port": 18789 },
   "models": {
@@ -99,30 +97,47 @@ if [ ! -f ~/.openclaw/openclaw.json ]; then
   },
   "agents": { "defaults": { "model": { "primary": "cursor/auto" } } }
 }
-EOF
+CONF
 fi
 
-# Auth profile placeholder
 if [ ! -f ~/.openclaw/agents/main/agent/auth-profiles.json ]; then
-    cat > ~/.openclaw/agents/main/agent/auth-profiles.json <<'EOF'
+    cat > ~/.openclaw/agents/main/agent/auth-profiles.json <<'CONF'
 {
   "profiles": {
     "cursor:default": { "type": "api_key", "provider": "cursor", "key": "placeholder" }
   }
 }
-EOF
+CONF
 fi
 
-# Copy skill
 cp -r "$REPO_DIR/skills/cursor-proxy" ~/.openclaw/skills/ 2>/dev/null || true
+
+# 6. Install systemd units (if available)
+echo "[6/6] Installing systemd units..."
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SYSTEMD_DIR="$SCRIPT_DIR/../systemd"
+if [ -d "$SYSTEMD_DIR" ]; then
+    mkdir -p ~/.config/systemd/user
+    cp "$SYSTEMD_DIR"/*.service ~/.config/systemd/user/ 2>/dev/null || true
+    systemctl --user daemon-reload 2>/dev/null || true
+    echo "   Installed to ~/.config/systemd/user/"
+else
+    echo "   Systemd dir not found, skipping"
+fi
+
+VM_IP=$(ip -4 addr show eth0 2>/dev/null | grep -oP 'inet \K[\d.]+' || echo "unknown")
 
 echo ""
 echo "=== Setup complete ==="
 echo ""
-echo "Next steps:"
-echo "  1. Log in:    openclaw-cursor login"
-echo "  2. Start:     openclaw-cursor start &"
-echo "  3. Gateway:   openclaw gateway --port 18789"
-echo "  4. Dashboard: http://$(hostname -I | awk '{print $1}'):18789/"
+echo "Start services:"
+echo "  openclaw-cursor login          # first time only"
+echo "  openclaw-cursor start &"
+echo "  openclaw gateway --port 18789 &"
 echo ""
-echo "From other VMs:  curl http://$(hostname -I | awk '{print $1}'):32125/health"
+echo "Verify:"
+echo "  curl http://127.0.0.1:32125/health"
+echo ""
+echo "From other VMs (via qubes.ConnectTCP):"
+echo "  qvm-connect-tcp 32125:$(qubesdb-read /name 2>/dev/null || echo 'this-vm'):32125"
+echo "  curl http://localhost:32125/health"
