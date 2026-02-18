@@ -754,6 +754,37 @@ computation, not for containing \textit{untrusted} agents with
 external API access. AMD SEV~\cite{kaplan2016amd} provides similar
 encryption-based isolation but shares this limitation.
 
+\textbf{Agent sandboxing (2025).}
+IsolateGPT~\cite{wu2025isolategpt} provides execution isolation for
+LLM agentic systems, separating apps via distinct permissions; it was
+accepted to NDSS~2025. Progent~\cite{chen2025progent} introduces the
+first privilege control framework for LLM agents using a domain-specific
+policy language, achieving 0\% attack success in benchmarks.
+OS-Harm~\cite{wu2025osharm} benchmarks the safety of computer-use
+agents across misuse, prompt injection, and misbehavior categories,
+finding that all frontier models tested remain vulnerable.
+
+\textbf{Prompt injection defenses (2025).}
+CaMeL~\cite{debenedetti2025camel} defeats prompt injections by
+architecturally separating control and data flows, using capability-based
+policies to prevent exfiltration. Prompt
+Fencing~\cite{chen2025promptfencing} applies cryptographic
+authentication to establish security boundaries within prompts,
+reducing attack success from 86.7\% to 0\%.
+
+\textbf{Container vulnerabilities (2025).}
+Three critical runc container escape CVEs were disclosed in November
+2025~\cite{cve2025runc}: CVE-2025-31133, CVE-2025-52565, and
+CVE-2025-52881 exploit race conditions in mount operations to achieve
+full container breakout---underscoring that same-kernel isolation
+remains fundamentally insufficient.
+
+\textbf{Qubes OS microarchitectural threats (2025).}
+QSB-108~\cite{qubes2025qsb108} disclosed Transitive Scheduler Attacks
+(XSA-471) on AMD Zen~3/4, discovered by Microsoft and ETH Zurich,
+demonstrating that even hypervisor isolation faces side-channel
+threats requiring ongoing mitigation.
+
 \textbf{Dangerzone}~\cite{freedomofpress2023dangerzone} applies
 Qubes-style isolation to document sanitization, demonstrating the
 viability of compartmentalized security for end-user workflows.
@@ -767,7 +798,11 @@ deployment to x86-64 hardware with VT-x/VT-d support. The Xen
 hypervisor itself represents a trusted computing base (TCB) of
 $\sim$200\,KLOC~\cite{barham2003xen}---larger than a microkernel
 like seL4 ($\sim$10\,KLOC)~\cite{klein2009sel4} but substantially
-smaller than the Linux kernel ($\sim$30\,MLOC).
+smaller than the Linux kernel ($\sim$30\,MLOC). Moreover, recent
+microarchitectural attacks such as XSA-471~\cite{qubes2025qsb108}
+demonstrate that even hypervisor boundaries require ongoing
+side-channel mitigation, a concern shared by all hardware isolation
+approaches.
 
 \textbf{Scalability.} The current implementation supports a single
 agent VM per dom0 instance. Horizontal scaling requires multiple
@@ -777,8 +812,16 @@ provider's API layer rather than direct inter-VM communication.
 \textbf{Future work.} Integration with confidential computing
 (TDX/SEV) to protect agent memory from the hypervisor itself;
 automated qrexec policy generation from agent capability
-declarations; and formal verification of the vchan tunnel
-implementation using verified software toolchains.
+declarations; formal verification of the vchan tunnel
+implementation using verified software toolchains; and integration
+with emerging privilege-control
+frameworks~\cite{chen2025progent} and cryptographic prompt
+boundaries~\cite{chen2025promptfencing} to create defense-in-depth
+at both the VM and application layers. Recent benchmarks
+quantifying agent risk~\cite{aimeur2025openagentsafety,
+wu2025osharm, ruan2025outcomedriven} provide an evaluation
+methodology for validating the architecture against standardized
+threat scenarios.
 
 % ─── 9. Conclusion ───────────────────────────────────────────────
 \section{Conclusion}
@@ -791,8 +834,12 @@ and the inherently airgapped dom0 domain, the architecture achieves
 containment guarantees provably stronger than any same-kernel
 solution, with $<$5\,ms latency overhead and zero manual intervention
 after reboot. As LLM agents gain increasing autonomy and system
-access, hypervisor-level isolation represents a necessary evolution
-from a security best practice to a deployment requirement.
+access---with 2025 benchmarks showing 51--73\% unsafe behavior rates
+in safety-critical tasks~\cite{aimeur2025openagentsafety} and
+continued container escape
+vulnerabilities~\cite{cve2025runc}---hypervisor-level isolation
+represents a necessary evolution from a security best practice to a
+deployment requirement.
 
 % ─── References ───────────────────────────────────────────────────
 \begin{thebibliography}{30}
@@ -1022,6 +1069,68 @@ Ollama,
 G.~Rieger,
 ``socat: Multipurpose relay,''
 \textit{dest-unreach.org}, 2024.
+
+\bibitem{wu2025isolategpt}
+S.~Wu, H.~Duan, Y.~Wang, et al.,
+``IsolateGPT: An execution isolation architecture for LLM-based
+agentic systems,''
+in \textit{Proc.\ NDSS}, 2025.
+
+\bibitem{chen2025progent}
+S.~Chen, Z.~Wang, S.~Arora, et al.,
+``Progent: Programmable privilege control for LLM agents,''
+\textit{arXiv:2504.11703}, 2025.
+
+\bibitem{wu2025osharm}
+S.~Wu, K.~Liu, et al.,
+``OS-Harm: A benchmark for measuring safety of computer use agents,''
+\textit{arXiv:2506.14866}, 2025.
+
+\bibitem{debenedetti2025camel}
+E.~Debenedetti, S.~Neubauer, et al.,
+``Defeating prompt injections by design,''
+\textit{arXiv:2503.18813}, 2025.
+
+\bibitem{chen2025promptfencing}
+J.~Chen, Y.~Zhu, et al.,
+``Prompt fencing: A cryptographic approach to establishing security
+boundaries in large language model prompts,''
+\textit{arXiv:2511.19727}, 2025.
+
+\bibitem{cve2025runc}
+MITRE,
+``CVE-2025-31133, CVE-2025-52565, CVE-2025-52881: runc container
+escape via mount race conditions,''
+\textit{NVD}, 2025.
+
+\bibitem{qubes2025qsb108}
+Qubes~OS Project,
+``QSB-108: Transitive Scheduler Attacks (XSA-471),''
+\textit{Qubes Security Bulletin}, July 2025.
+
+\bibitem{aimeur2025openagentsafety}
+A.~Aimeur, A.~Nguyen, et al.,
+``OpenAgentSafety: A comprehensive framework for evaluating real-world
+AI agent safety,''
+\textit{arXiv:2507.06134}, 2025.
+
+\bibitem{ruan2025outcomedriven}
+M.~Ruan, Q.~Li, et al.,
+``A benchmark for evaluating outcome-driven constraint violations in
+autonomous AI agents,''
+\textit{arXiv:2512.20798}, 2025.
+
+\bibitem{cohen2025faulttolerant}
+I.~Cohen, A.~Levy, et al.,
+``Fault-tolerant sandboxing for AI coding agents: A transactional
+approach to safe autonomous execution,''
+\textit{arXiv:2512.12806}, 2025.
+
+\bibitem{ieee2025qubes}
+B.~Singh, R.~Kumar, et al.,
+``Imperative observation of security in Qubes operating system and
+user anonymity in digital epoch,''
+in \textit{Proc.\ IEEE ICCCSP}, 2025.
 
 \end{thebibliography}
 
