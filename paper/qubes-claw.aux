@@ -3,72 +3,168 @@
 \providecommand\HyField@AuxAddToFields[1]{}
 \providecommand\HyField@AuxAddToCoFields[2]{}
 \citation{openai2024agents}
+\citation{anthropic2024claude}
+\citation{xi2023rise}
+\citation{greshake2023youve}
+\citation{perez2022ignore}
+\citation{liu2024prompt}
+\citation{ji2023survey}
+\citation{wallace2019universal}
+\citation{merkel2014docker}
+\citation{young2019gvisor}
+\citation{agache2020firecracker}
+\citation{sultan2019container}
+\citation{lin2018measurement}
+\citation{cve2024leaky}
+\citation{smalley2001implementing}
+\citation{bauer2006paranoid}
+\citation{jain2023baseline}
+\citation{costan2016intel}
+\citation{sardar2022demystifying}
+\citation{gao2024taxonomy}
+\citation{rutkowska2010qubes}
+\citation{barham2003xen}
+\citation{qubes2024qrexec}
+\citation{qubes2024vchan}
 \@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
 \newlabel{sec:intro}{{1}{1}{Introduction}{section.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Contributions}{1}{subsection.1.1}\protected@file@percent }
+\citation{xen2024grant}
+\citation{xi2023rise}
 \citation{rutkowska2010qubes}
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Contributions}{2}{subsection.1.1}\protected@file@percent }
+\citation{openai2024gpt4}
+\citation{anthropic2024claude}
+\citation{ollama2024}
+\citation{kwon2023vllm}
+\citation{rieger2024socat}
+\citation{gamma1994design}
+\citation{nist800-53}
+\citation{bishop2003computer}
+\citation{barham2003xen}
+\citation{ben2010taming}
+\citation{sultan2019container}
 \@writefile{toc}{\contentsline {section}{\numberline {2}Background}{2}{section.2}\protected@file@percent }
 \newlabel{sec:background}{{2}{2}{Background}{section.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Qubes OS and the Xen Security Model}{2}{subsection.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}The Agent Trust Problem}{2}{subsection.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3}Architecture}{2}{section.3}\protected@file@percent }
-\newlabel{sec:arch}{{3}{2}{Architecture}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Xen and the Qubes Security Model}{2}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}The Agent Containment Problem}{2}{subsection.2.2}\protected@file@percent }
+\newlabel{def:trust}{{1}{2}{Agent Trust Deficit}{definition.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}System Architecture}{2}{section.3}\protected@file@percent }
+\newlabel{sec:arch}{{3}{2}{System Architecture}{section.3}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Trust Domains}{2}{subsection.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Qrexec Tunnel Design}{2}{subsection.3.2}\protected@file@percent }
-\newlabel{sec:tunnels}{{3.2}{2}{Qrexec Tunnel Design}{subsection.3.2}{}}
-\citation{sultan2019container}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces qubes-claw system architecture. Dashed blue arrows represent qrexec tunnels (Xen shared memory). The admin domain \texttt  {dom0} has no network interface; all communication uses \texttt  {vchan} pages managed by the hypervisor. The agent VM connects to LLM providers through standard HTTPS.}}{3}{figure.caption.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Vchan Tunnel Design}{2}{subsection.3.2}\protected@file@percent }
+\newlabel{sec:tunnels}{{3.2}{2}{Vchan Tunnel Design}{subsection.3.2}{}}
+\newlabel{prop:netiso}{{1}{2}{Network Isolation}{property.1}{}}
+\newlabel{lst:tunnel}{{1}{2}{Tunnel service template (systemd). Each instance binds a local port and forwards via qrexec}{lstlisting.1}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1}{\ignorespaces Tunnel service template (systemd). Each instance binds a local port and forwards via qrexec.}}{2}{lstlisting.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Provider-Agnostic Proxy Layer}{2}{subsection.3.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Supported LLM provider backends.}}{2}{table.caption.2}\protected@file@percent }
+\newlabel{tab:providers}{{1}{2}{Supported LLM provider backends}{table.caption.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Formal Security Analysis}{2}{section.4}\protected@file@percent }
+\newlabel{sec:security}{{4}{2}{Formal Security Analysis}{section.4}{}}
+\citation{klein2009sel4}
+\citation{gu2016certikos}
+\citation{qubes2024qrexec}
+\citation{ferraiolo2001proposed}
+\citation{greshake2023youve}
+\citation{wallace2019universal}
+\citation{ohm2020backstabber}
+\citation{herder2006failure}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces \textbf  {System architecture.} Dashed blue lines represent vchan tunnels (Xen shared memory, not TCP/IP). The control domain dom0 has no network interface; all traffic traverses the hypervisor's grant-table mechanism. The agent VM connects to external LLM providers via standard HTTPS.}}{3}{figure.caption.1}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{fig:architecture}{{1}{3}{qubes-claw system architecture. Dashed blue arrows represent qrexec tunnels (Xen shared memory). The admin domain \texttt {dom0} has no network interface; all communication uses \texttt {vchan} pages managed by the hypervisor. The agent VM connects to LLM providers through standard HTTPS}{figure.caption.1}{}}
-\newlabel{lst:tunnel}{{1}{3}{Dom0 tunnel service template (\texttt {systemd}). Each tunnel instance binds a local port and forwards through qrexec}{lstlisting.1}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {1}{\ignorespaces Dom0 tunnel service template (\texttt  {systemd}). Each tunnel instance binds a local port and forwards through qrexec.}}{3}{lstlisting.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4}Multi-Provider Architecture}{3}{section.4}\protected@file@percent }
-\newlabel{sec:providers}{{4}{3}{Multi-Provider Architecture}{section.4}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Supported LLM providers and their characteristics.}}{3}{table.caption.2}\protected@file@percent }
-\newlabel{tab:providers}{{1}{3}{Supported LLM providers and their characteristics}{table.caption.2}{}}
-\newlabel{lst:config}{{2}{3}{Multi-provider configuration excerpt. API keys use environment variable placeholders and never appear in version control}{lstlisting.2}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {2}{\ignorespaces Multi-provider configuration excerpt. API keys use environment variable placeholders and never appear in version control.}}{3}{lstlisting.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5}Security Analysis}{3}{section.5}\protected@file@percent }
-\newlabel{sec:security}{{5}{3}{Security Analysis}{section.5}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Defense-in-depth: four independent security layers. Each layer can be breached without compromising the others.}}{4}{figure.caption.3}\protected@file@percent }
-\newlabel{fig:security}{{2}{4}{Defense-in-depth: four independent security layers. Each layer can be breached without compromising the others}{figure.caption.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Layer 1: Xen Hypervisor Isolation}{4}{subsection.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Layer 2: Qrexec Policy Engine}{4}{subsection.5.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Layer 3: Port Restrictions}{4}{subsection.5.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Layer 4: Gateway Token Authentication}{4}{subsection.5.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Threat Model}{4}{subsection.5.5}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Threat model: attack vectors and mitigations.}}{4}{table.caption.4}\protected@file@percent }
-\newlabel{tab:threats}{{2}{4}{Threat model: attack vectors and mitigations}{table.caption.4}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Implementation}{4}{section.6}\protected@file@percent }
-\newlabel{sec:impl}{{6}{4}{Implementation}{section.6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Deployment Modes}{4}{subsection.6.1}\protected@file@percent }
+\newlabel{fig:architecture}{{1}{3}{\textbf {System architecture.} Dashed blue lines represent vchan tunnels (Xen shared memory, not TCP/IP). The control domain dom0 has no network interface; all traffic traverses the hypervisor's grant-table mechanism. The agent VM connects to external LLM providers via standard HTTPS}{figure.caption.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces \textbf  {Defense-in-depth model.} Each layer provides containment independent of the others. A breach at any single layer does not compromise the remaining three.}}{3}{figure.caption.3}\protected@file@percent }
+\newlabel{fig:security}{{2}{3}{\textbf {Defense-in-depth model.} Each layer provides containment independent of the others. A breach at any single layer does not compromise the remaining three}{figure.caption.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Layer 1: Xen Hypervisor Isolation}{3}{subsection.4.1}\protected@file@percent }
+\newlabel{thm:containment}{{1}{3}{Hypervisor Containment}{theorem.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Layer 2: Qrexec Policy Engine}{3}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Layer 3: Port-Level Firewall}{3}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Layer 4: Gateway Token Authentication}{3}{subsection.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Formal Threat Analysis}{3}{subsection.4.5}\protected@file@percent }
+\citation{poettering2010systemd}
+\citation{kwon2023vllm}
+\citation{agache2020firecracker}
 \citation{rutkowska2010qubes}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Reboot Persistence}{5}{subsection.6.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Boot sequence. Each step triggers the next automatically through systemd dependencies and Qubes autostart.}}{5}{figure.caption.5}\protected@file@percent }
-\newlabel{fig:boot}{{3}{5}{Boot sequence. Each step triggers the next automatically through systemd dependencies and Qubes autostart}{figure.caption.5}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Reboot persistence: all components auto-start.}}{5}{table.caption.6}\protected@file@percent }
-\newlabel{tab:persistence}{{3}{5}{Reboot persistence: all components auto-start}{table.caption.6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}One-Command Setup}{5}{subsection.6.3}\protected@file@percent }
-\newlabel{lst:setup}{{3}{5}{Complete deployment in two commands}{lstlisting.3}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {3}{\ignorespaces Complete deployment in two commands.}}{5}{lstlisting.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {7}Evaluation}{5}{section.7}\protected@file@percent }
-\newlabel{sec:eval}{{7}{5}{Evaluation}{section.7}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Latency Overhead}{5}{subsection.7.1}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces API call latency (median of 100 requests).}}{5}{table.caption.7}\protected@file@percent }
-\newlabel{tab:latency}{{4}{5}{API call latency (median of 100 requests)}{table.caption.7}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Resource Overhead}{5}{subsection.7.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.3}Comparison with Alternatives}{5}{subsection.7.3}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Comparison with alternative isolation approaches.}}{5}{table.caption.8}\protected@file@percent }
-\newlabel{tab:comparison}{{5}{5}{Comparison with alternative isolation approaches}{table.caption.8}{}}
-\citation{freedomofpress2023dangerzone}
 \citation{qubes2023splitgpg}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Threat model with containment mapping.}}{4}{table.caption.4}\protected@file@percent }
+\newlabel{tab:threats}{{2}{4}{Threat model with containment mapping}{table.caption.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Persistence and Lifecycle}{4}{section.5}\protected@file@percent }
+\newlabel{sec:persistence}{{5}{4}{Persistence and Lifecycle}{section.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Boot dependency chain. Each stage triggers the next through systemd ordering and Qubes autostart.}}{4}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:boot}{{3}{4}{Boot dependency chain. Each stage triggers the next through systemd ordering and Qubes autostart}{figure.caption.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Persistence mechanisms for each component.}}{4}{table.caption.6}\protected@file@percent }
+\newlabel{tab:persistence}{{3}{4}{Persistence mechanisms for each component}{table.caption.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Evaluation}{4}{section.6}\protected@file@percent }
+\newlabel{sec:eval}{{6}{4}{Evaluation}{section.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Tunnel Latency}{4}{subsection.6.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces API call latency (median of 100 requests).}}{4}{table.caption.7}\protected@file@percent }
+\newlabel{tab:latency}{{4}{4}{API call latency (median of 100 requests)}{table.caption.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Resource Overhead}{4}{subsection.6.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Memory footprint of infrastructure components.}}{4}{table.caption.8}\protected@file@percent }
+\newlabel{tab:resources}{{5}{4}{Memory footprint of infrastructure components}{table.caption.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Comparative Analysis}{4}{subsection.6.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Isolation comparison across containment approaches.}}{4}{table.caption.9}\protected@file@percent }
+\newlabel{tab:comparison}{{6}{4}{Isolation comparison across containment approaches}{table.caption.9}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Related Work}{4}{section.7}\protected@file@percent }
+\newlabel{sec:related}{{7}{4}{Related Work}{section.7}{}}
+\citation{sultan2019container}
+\citation{lin2018measurement}
+\citation{young2019gvisor}
+\citation{agache2020firecracker}
+\citation{xi2023rise}
+\citation{greshake2023youve}
+\citation{ruan2024toolemu}
+\citation{jain2023baseline}
+\citation{costan2016intel}
+\citation{sardar2022demystifying}
+\citation{kaplan2016amd}
+\citation{freedomofpress2023dangerzone}
+\citation{barham2003xen}
+\citation{klein2009sel4}
 \bibcite{rutkowska2010qubes}{1}
-\bibcite{openai2024agents}{2}
-\bibcite{sultan2019container}{3}
-\bibcite{freedomofpress2023dangerzone}{4}
-\bibcite{qubes2023splitgpg}{5}
-\@writefile{toc}{\contentsline {section}{\numberline {8}Related Work}{6}{section.8}\protected@file@percent }
-\newlabel{sec:related}{{8}{6}{Related Work}{section.8}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {9}Conclusion}{6}{section.9}\protected@file@percent }
-\newlabel{sec:conclusion}{{9}{6}{Conclusion}{section.9}{}}
+\bibcite{barham2003xen}{2}
+\bibcite{openai2024agents}{3}
+\bibcite{anthropic2024claude}{4}
+\bibcite{xi2023rise}{5}
+\bibcite{greshake2023youve}{6}
+\bibcite{perez2022ignore}{7}
+\bibcite{liu2024prompt}{8}
+\bibcite{ji2023survey}{9}
+\bibcite{wallace2019universal}{10}
+\bibcite{merkel2014docker}{11}
+\bibcite{young2019gvisor}{12}
+\bibcite{agache2020firecracker}{13}
+\bibcite{sultan2019container}{14}
+\bibcite{lin2018measurement}{15}
+\bibcite{cve2024leaky}{16}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Discussion}{5}{section.8}\protected@file@percent }
+\newlabel{sec:discussion}{{8}{5}{Discussion}{section.8}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {9}Conclusion}{5}{section.9}\protected@file@percent }
+\newlabel{sec:conclusion}{{9}{5}{Conclusion}{section.9}{}}
+\bibcite{smalley2001implementing}{17}
+\bibcite{bauer2006paranoid}{18}
+\bibcite{jain2023baseline}{19}
+\bibcite{costan2016intel}{20}
+\bibcite{sardar2022demystifying}{21}
+\bibcite{kaplan2016amd}{22}
+\bibcite{gao2024taxonomy}{23}
+\bibcite{ruan2024toolemu}{24}
+\bibcite{qubes2024qrexec}{25}
+\bibcite{qubes2024vchan}{26}
+\bibcite{xen2024grant}{27}
+\bibcite{klein2009sel4}{28}
+\bibcite{gu2016certikos}{29}
+\bibcite{ben2010taming}{30}
+\bibcite{nist800-53}{31}
+\bibcite{bishop2003computer}{32}
+\bibcite{ferraiolo2001proposed}{33}
+\bibcite{gamma1994design}{34}
+\bibcite{qubes2023splitgpg}{35}
+\bibcite{freedomofpress2023dangerzone}{36}
+\bibcite{ohm2020backstabber}{37}
+\bibcite{herder2006failure}{38}
+\bibcite{poettering2010systemd}{39}
+\bibcite{openai2024gpt4}{40}
+\bibcite{kwon2023vllm}{41}
+\bibcite{ollama2024}{42}
+\bibcite{rieger2024socat}{43}
 \gdef \@abspage@last{6}
