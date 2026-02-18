@@ -1,0 +1,8 @@
+{
+  "port": 32125,
+  "log_level": "info",
+  "tool_mode": "openclaw",
+  "timeout_ms": 300000,
+  "default_model": "auto",
+  "enable_thinking": true
+}

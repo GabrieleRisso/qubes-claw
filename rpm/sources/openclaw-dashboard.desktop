@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=OpenClaw Dashboard
+Comment=Open OpenClaw admin UI via ConnectTCP tunnel
+Exec=sh -c 'openclaw-connect & sleep 3; xdg-open "http://localhost:18789/"'
+Icon=web-browser
+Terminal=false
+Categories=Network;

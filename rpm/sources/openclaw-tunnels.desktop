@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=OpenClaw Tunnels
+Comment=Auto-connect to OpenClaw server VM at login
+Exec=openclaw-connect
+Terminal=true
+StartupNotify=false
+X-GNOME-Autostart-Delay=5

@@ -1,0 +1,5 @@
+# OpenClaw: allow openclaw-admin to connect to proxy + gateway on the server VM
+# Traffic goes through qrexec (Xen vchan), not the network stack
+# Edit the target VM name below to match your setup
+qubes.ConnectTCP +32125 openclaw-admin @default allow target=visyble
+qubes.ConnectTCP +18789 openclaw-admin @default allow target=visyble
