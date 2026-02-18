@@ -1,0 +1,16 @@
+#!/bin/sh
+# Forward TCP traffic from dom0 to the OpenClaw server VM via qrexec.
+# Called by socat from openclaw-tunnel@.service.
+#
+# Usage: openclaw-tcp-forward <port>
+#
+# The target VM is read from /etc/qubes/openclaw.conf (OPENCLAW_VM=).
+# Falls back to "visyble" if not set.
+
+CONF="/etc/qubes/openclaw.conf"
+if [ -f "$CONF" ]; then
+    . "$CONF"
+fi
+VM="${OPENCLAW_VM:-visyble}"
+
+exec /usr/bin/qrexec-client -d "$VM" "DEFAULT:QUBESRPC qubes.ConnectTCP+$1 dom0"

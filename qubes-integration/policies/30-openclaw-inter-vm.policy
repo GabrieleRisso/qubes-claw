@@ -1,0 +1,15 @@
+## OpenClaw inter-VM communication policy
+##
+## Allows tagged OpenClaw VMs to communicate freely.
+## Only needed if VMs need shell/exec/file-copy access to each other.
+## Skip this file if you only need API access via ConnectTCP.
+
+## Shell and exec (bidirectional between all openclaw VMs)
+qubes.VMShell  * @tag:openclaw-client @tag:openclaw-server allow
+qubes.VMShell  * @tag:openclaw-server @tag:openclaw-client allow
+qubes.VMExec   * @tag:openclaw-client @tag:openclaw-server allow
+qubes.VMExec   * @tag:openclaw-server @tag:openclaw-client allow
+
+## File copy without prompting
+qubes.Filecopy * @tag:openclaw-client @tag:openclaw-server allow
+qubes.Filecopy * @tag:openclaw-server @tag:openclaw-client allow

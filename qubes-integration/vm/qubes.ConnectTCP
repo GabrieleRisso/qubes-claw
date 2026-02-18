@@ -1,0 +1,6 @@
+#!/bin/sh
+# /etc/qubes-rpc/qubes.ConnectTCP — handler for qrexec TCP forwarding
+# Forwards incoming connections to localhost on the port specified by
+# the qrexec service argument. Used by dom0 tunnels to reach the
+# OpenClaw proxy (32125) and gateway (18789).
+exec socat - "TCP:127.0.0.1:${QREXEC_SERVICE_ARGUMENT}"

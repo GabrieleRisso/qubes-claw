@@ -1,17 +1,18 @@
 [Unit]
-Description=OpenClaw Gateway
+Description=OpenClaw Gateway (WebSocket + Dashboard)
 After=network-online.target openclaw-cursor-proxy.service
 Wants=network-online.target
-Requires=openclaw-cursor-proxy.service
 
 [Service]
 Type=simple
-ExecStartPre=/bin/sleep 3
-ExecStart=%h/.npm-global/bin/openclaw gateway --port 18789 --bind lan
+ExecStartPre=/bin/sh -c "fuser -k 18789/tcp 2>/dev/null || true"
+ExecStart=%h/.npm-global/bin/openclaw gateway --bind loopback
 Restart=on-failure
 RestartSec=5
 Environment=PATH=%h/.local/bin:%h/.npm-global/bin:/usr/local/bin:/usr/bin
 Environment=HOME=%h
+Environment=NODE_NO_WARNINGS=1
+WorkingDirectory=%h
 
 [Install]
 WantedBy=default.target
