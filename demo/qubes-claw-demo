@@ -1,0 +1,205 @@
+#!/bin/bash
+set -euo pipefail
+
+# qubes-claw-demo — Screen capture and demo toolkit for qubes-claw
+#
+# Run from a dom0 terminal (needs DISPLAY access).
+#
+# Usage:
+#   qubes-claw-demo screenshot [name]       Full-screen screenshot
+#   qubes-claw-demo window <title> [name]   Capture a specific window
+#   qubes-claw-demo record [seconds]        Screen record with pointer
+#   qubes-claw-demo diagrams                Generate architecture diagrams
+#   qubes-claw-demo demo                    Full orchestrated demo capture
+#   qubes-claw-demo post [1|2|3|all]        Generate X-post-ready images
+
+OUTDIR="${HOME:-/root}/qubes-claw-demo"
+SSDIR="$OUTDIR/screenshots"
+RECDIR="$OUTDIR/recordings"
+DIAGDIR="$OUTDIR/diagrams"
+POSTDIR="$OUTDIR/posts"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+ts() { date +%Y%m%d-%H%M%S; }
+
+ensure_dirs() {
+    mkdir -p "$SSDIR" "$RECDIR" "$DIAGDIR" "$POSTDIR"
+}
+
+screenshot() {
+    ensure_dirs
+    local name="${1:-screenshot-$(ts)}"
+    local out="$SSDIR/${name}.png"
+    if command -v scrot &>/dev/null; then
+        scrot -o "$out"
+    else
+        ffmpeg -y -f x11grab -video_size "$(xdpyinfo 2>/dev/null | grep dimensions | awk '{print $2}' || echo 1920x1080)" \
+            -i "${DISPLAY:-:0}" -frames:v 1 -update 1 "$out" 2>/dev/null
+    fi
+    echo "Screenshot: $out"
+}
+
+window_capture() {
+    ensure_dirs
+    local title="$1"
+    local name="${2:-window-$(ts)}"
+    local out="$SSDIR/${name}.png"
+
+    local wid
+    wid=$(xdotool search --name "$title" 2>/dev/null | head -1)
+    if [ -z "$wid" ]; then
+        echo "Window not found: $title" >&2
+        return 1
+    fi
+
+    xdotool windowactivate --sync "$wid" 2>/dev/null
+    sleep 0.5
+
+    if command -v scrot &>/dev/null; then
+        scrot -u -o "$out"
+    else
+        local geom
+        geom=$(xdotool getwindowgeometry --shell "$wid" 2>/dev/null)
+        eval "$geom"
+        ffmpeg -y -f x11grab -video_size "${WIDTH}x${HEIGHT}" \
+            -i "${DISPLAY:-:0}+${X},${Y}" -frames:v 1 -update 1 "$out" 2>/dev/null
+    fi
+    echo "Window capture: $out"
+}
+
+record() {
+    ensure_dirs
+    local duration="${1:-30}"
+    local out="$RECDIR/demo-$(ts).mp4"
+    local size
+    size=$(xdpyinfo 2>/dev/null | grep dimensions | awk '{print $2}' || echo 1920x1080)
+
+    echo "Recording ${duration}s to $out (Ctrl+C to stop early)..."
+    echo "Display: ${DISPLAY:-:0}, Resolution: $size"
+
+    trap 'echo; echo "Recording saved: $out"' INT
+    ffmpeg -y \
+        -f x11grab \
+        -framerate 30 \
+        -video_size "$size" \
+        -draw_mouse 1 \
+        -i "${DISPLAY:-:0}" \
+        -t "$duration" \
+        -c:v libopenh264 \
+        -preset fast \
+        -pix_fmt yuv420p \
+        "$out" 2>/dev/null || true
+    trap - INT
+
+    echo "Recording saved: $out"
+    echo "Size: $(du -h "$out" | cut -f1)"
+}
+
+demo_capture() {
+    ensure_dirs
+    echo "=== qubes-claw demo capture ==="
+    echo ""
+    echo "This will:"
+    echo "  1. Capture current desktop"
+    echo "  2. Open admin web and capture the OpenClaw tab"
+    echo "  3. Open gateway dashboard and capture it"
+    echo "  4. Capture terminal with health checks"
+    echo "  5. Record a short video walkthrough"
+    echo ""
+    read -p "Press Enter to start (or Ctrl+C to cancel)..."
+
+    echo "[1/5] Desktop screenshot..."
+    screenshot "01-desktop"
+
+    echo "[2/5] Opening admin web..."
+    firefox http://127.0.0.1:9876 &>/dev/null &
+    sleep 4
+    screenshot "02-admin-web"
+
+    echo "[3/5] Opening gateway dashboard..."
+    firefox "http://127.0.0.1:18789#token=dom0-local" &>/dev/null &
+    sleep 5
+    screenshot "03-gateway-dashboard"
+
+    echo "[4/5] Terminal health checks..."
+    local term_out="$SSDIR/04-health-checks.txt"
+    {
+        echo "$ qvm-ls --format simple | head -15"
+        qvm-ls --format simple 2>/dev/null | head -15
+        echo ""
+        echo "$ systemctl is-active openclaw-tunnel@32125 openclaw-tunnel@18789"
+        systemctl is-active openclaw-tunnel@32125.service openclaw-tunnel@18789.service 2>/dev/null || true
+        echo ""
+        echo "$ curl -s http://127.0.0.1:32125/health"
+        curl -sf --max-time 3 http://127.0.0.1:32125/health 2>/dev/null || echo "(not reachable)"
+        echo ""
+        echo "$ curl -s http://127.0.0.1:18789/ -o /dev/null -w 'HTTP %{http_code}'"
+        local code
+        code=$(curl -sf --max-time 3 http://127.0.0.1:18789/ -o /dev/null -w '%{http_code}' 2>/dev/null || echo "000")
+        echo "HTTP $code"
+    } > "$term_out" 2>&1
+    echo "  Health output saved to $term_out"
+    screenshot "04-terminal"
+
+    echo "[5/5] Recording 30s demo..."
+    record 30
+
+    echo ""
+    echo "=== Demo capture complete ==="
+    echo "Files in: $OUTDIR"
+    ls -lh "$SSDIR"/ "$RECDIR"/
+}
+
+gen_diagrams() {
+    ensure_dirs
+    local gen="$SCRIPT_DIR/generate-diagrams.py"
+    if [ ! -f "$gen" ]; then
+        echo "generate-diagrams.py not found at $gen" >&2
+        return 1
+    fi
+    python3 "$gen" "$DIAGDIR"
+    echo "Diagrams in: $DIAGDIR"
+    ls -lh "$DIAGDIR"/
+}
+
+gen_posts() {
+    ensure_dirs
+    local gen="$SCRIPT_DIR/generate-posts.py"
+    if [ ! -f "$gen" ]; then
+        echo "generate-posts.py not found at $gen" >&2
+        return 1
+    fi
+    local which="${1:-all}"
+    python3 "$gen" "$DIAGDIR" "$SSDIR" "$POSTDIR" "$which"
+    echo "Posts in: $POSTDIR"
+    ls -lh "$POSTDIR"/
+}
+
+usage() {
+    cat <<'EOF'
+qubes-claw-demo — Screen capture and demo toolkit
+
+Usage:
+  qubes-claw-demo screenshot [name]       Full-screen screenshot
+  qubes-claw-demo window <title> [name]   Capture a specific window
+  qubes-claw-demo record [seconds]        Screen record with pointer (default 30s)
+  qubes-claw-demo diagrams                Generate architecture diagrams
+  qubes-claw-demo demo                    Full orchestrated demo capture
+  qubes-claw-demo post [1|2|3|all]        Generate X-post-ready images
+
+Output goes to ~/qubes-claw-demo/{screenshots,recordings,diagrams,posts}/
+
+Must be run from a dom0 terminal with DISPLAY access.
+EOF
+}
+
+case "${1:-}" in
+    screenshot)  screenshot "${2:-}" ;;
+    window)      window_capture "${2:?Usage: qubes-claw-demo window <title> [name]}" "${3:-}" ;;
+    record)      record "${2:-30}" ;;
+    diagrams)    gen_diagrams ;;
+    demo)        demo_capture ;;
+    post)        gen_posts "${2:-all}" ;;
+    -h|--help|help) usage ;;
+    *)           usage; exit 1 ;;
+esac
