@@ -1,30 +1,32 @@
 #!/bin/bash
-# dom0-workspace-setup.sh — Move visyble windows to workspace 2
+# dom0-workspace-setup.sh — Move OpenClaw windows to workspace 2
 # Install as dom0 autostart: ~/.config/autostart/openclaw-workspace.desktop
 #
-# Waits for visyble windows to appear, then moves them to desktop 2 (index 1)
+# Moves visyble + openclaw-admin windows to desktop 2 (index 1)
 
-WORKSPACE=1  # 0-indexed: desktop 2 = index 1
-VM_NAME="visyble"
+WORKSPACE=1
 MAX_WAIT=120
 WAITED=0
 
 sleep 15
 
 while [ $WAITED -lt $MAX_WAIT ]; do
-    WINDOWS=$(wmctrl -l 2>/dev/null | grep -i "\[$VM_NAME\]" | awk '{print $1}')
-    if [ -n "$WINDOWS" ]; then
-        for WID in $WINDOWS; do
-            TITLE=$(wmctrl -l 2>/dev/null | grep "$WID" | cut -d' ' -f5-)
-            wmctrl -i -r "$WID" -t $WORKSPACE 2>/dev/null
-            echo "Moved $WID ($TITLE) to workspace $((WORKSPACE+1))"
+    MOVED=0
+    for PATTERN in "OpenClaw" "visyble" "openclaw-admin" "Cursor" "Lain"; do
+        WIDS=$(wmctrl -l 2>/dev/null | grep -i "$PATTERN" | awk '{print $1}')
+        for WID in $WIDS; do
+            CUR=$(wmctrl -l 2>/dev/null | grep "$WID" | awk '{print $2}')
+            if [ "$CUR" != "$WORKSPACE" ]; then
+                wmctrl -i -r "$WID" -t $WORKSPACE 2>/dev/null
+                MOVED=$((MOVED + 1))
+            fi
         done
+    done
+
+    if [ $MOVED -gt 0 ] || [ $WAITED -gt 30 ]; then
         break
     fi
+
     sleep 5
     WAITED=$((WAITED + 5))
 done
-
-if [ $WAITED -ge $MAX_WAIT ]; then
-    echo "Timeout: no $VM_NAME windows found after ${MAX_WAIT}s"
-fi
