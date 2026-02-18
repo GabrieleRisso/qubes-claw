@@ -283,7 +283,7 @@ a minimal, auditable communication channel.
 ]
 
 % ── dom0 ──
-\node[domframe, fill=blue1!5, draw=blue1!60] (dom0) at (0,0) {};
+\node[domframe, fill=blue1!5, draw=blue1!60] (dom0) at (0,0.5) {};
 \node[font=\sffamily\bfseries\fontsize{7.5}{9}\selectfont, color=blue1!85,
       anchor=north west] at ([xshift=3pt,yshift=-3pt]dom0.north west)
     {dom0 \textnormal{\fontsize{6}{7}\selectfont(airgapped)}};
@@ -330,7 +330,7 @@ a minimal, auditable communication channel.
 \node[draw, thick, fill=red1!6, draw=red1!50, rounded corners=3pt,
       minimum width=13.5cm, minimum height=0.55cm,
       font=\sffamily\bfseries\fontsize{7.5}{9}\selectfont, text=red1!75,
-      below=1cm of vm.south] (xen)
+      below=1.8cm of vm.south] (xen)
     {Xen Hypervisor --- Hardware Memory Isolation};
 
 % ── Tunnels ──
