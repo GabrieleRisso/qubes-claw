@@ -227,13 +227,19 @@ qubes-claw/
 │   ├── examples/                      # Provider config templates
 │   └── README.md                      # Detailed integration docs
 ├── paper/
-│   ├── qubes-claw.tex                 # LaTeX source (TikZ diagrams)
-│   ├── qubes-claw.pdf                 # Compiled paper (6 pages)
-│   └── posts.md                       # X/LinkedIn/blog post content
+│   ├── qubes-claw.tex                 # LaTeX source (TikZ diagrams, 50+ refs)
+│   ├── qubes-claw.pdf                 # Compiled paper (~7 pages)
+│   ├── posts.md                       # X/LinkedIn/Dev.to/HN/Reddit content
+│   ├── blog-qubes-claw.md             # Website-ready blog post
+│   ├── MANIFEST.md                    # Publication asset inventory
+│   └── Makefile                       # Build: make all (PDF + PNGs + sync)
 ├── demo/
 │   ├── qubes-claw-demo                # Screenshot/recording toolkit
-│   ├── generate-diagrams.py           # Architecture diagram generator
-│   └── generate-posts.py              # X post image compositor
+│   ├── generate-diagrams.py           # Architecture diagram generator (Pillow)
+│   ├── generate-posts.py              # Social media card generator (Pillow)
+│   ├── architecture.png               # System architecture diagram
+│   ├── persistence.png                # Reboot persistence diagram
+│   └── security.png                   # Security layers diagram
 ├── openclaw/                          # openclaw-cursor proxy (submodule)
 └── README.md                          # This file
 ```
@@ -245,9 +251,21 @@ cd openclaw
 docker compose up -d
 ```
 
+## Publications
+
+The `paper/` directory contains a full academic paper and all associated marketing content. Run `make all` inside `paper/` to rebuild everything and sync to `~/Documents/qubes-claw/`.
+
+| Asset | File | Description |
+|-------|------|-------------|
+| Paper (PDF) | [`paper/qubes-claw.pdf`](paper/qubes-claw.pdf) | ~7 pages, 50+ references (2025 included) |
+| Blog post | [`paper/blog-qubes-claw.md`](paper/blog-qubes-claw.md) | Website-ready with frontmatter |
+| Social content | [`paper/posts.md`](paper/posts.md) | X, LinkedIn, Dev.to, HN, Reddit |
+| Architecture diagram | [`demo/architecture.png`](demo/architecture.png) | 1200x675, light academic palette |
+| Security diagram | [`demo/security.png`](demo/security.png) | Four-layer defense visualization |
+| Build guide | [`paper/MANIFEST.md`](paper/MANIFEST.md) | Complete asset inventory + deps |
+
 ## Links
 
-- **Paper (PDF):** [`paper/qubes-claw.pdf`](paper/qubes-claw.pdf)
 - **OpenClaw docs:** [docs.openclaw.ai](https://docs.openclaw.ai/)
 - **Qubes integration details:** [`qubes-integration/README.md`](qubes-integration/README.md)
 - **Demo toolkit:** [`demo/README.md`](demo/README.md)
