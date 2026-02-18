@@ -1,0 +1,36 @@
+---
+description: Docker containerization conventions for the proxy
+globs: "**/Dockerfile,**/docker-compose.yml,**/docker/**"
+alwaysApply: false
+---
+
+# Docker conventions
+
+## Multi-stage build
+
+- Stage 1: `golang:1.22-alpine` builder (CGO_ENABLED=0)
+- Stage 2: `node:22-slim` runtime with cursor-agent + openclaw
+
+## Auth injection (3 methods)
+
+1. Mount `~/.config/cursor/auth.json` read-only (default)
+2. Env vars: `CURSOR_ACCESS_TOKEN` + `CURSOR_REFRESH_TOKEN`
+3. Env var: `CURSOR_API_KEY`
+
+## Entrypoint modes
+
+- `proxy` — proxy only (default)
+- `both` — proxy + openclaw gateway
+- `test` — self-test and exit
+- `shell` — interactive bash
+
+## Ports
+
+- 32125: proxy (OpenAI-compatible API)
+- 18789: OpenClaw gateway + dashboard
+
+## Health check
+
+```bash
+curl -sf http://127.0.0.1:32125/health | jq -e '.status == "healthy"'
+```

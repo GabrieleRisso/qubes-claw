@@ -1,0 +1,15 @@
+[Unit]
+Description=OpenClaw Cursor Proxy
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/openclaw-cursor start
+Restart=on-failure
+RestartSec=5
+Environment=PATH=%h/.local/bin:%h/.npm-global/bin:/usr/local/bin:/usr/bin
+Environment=HOME=%h
+
+[Install]
+WantedBy=default.target

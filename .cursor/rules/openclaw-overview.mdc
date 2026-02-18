@@ -1,0 +1,35 @@
+---
+description: OpenClaw platform knowledge — architecture, gateway, tools, config
+alwaysApply: true
+---
+
+# OpenClaw Platform
+
+OpenClaw is a self-hosted AI agent gateway. One process (`openclaw gateway`) bridges chat apps (WhatsApp, Telegram, Discord, iMessage) to AI coding agents.
+
+## Architecture
+
+- **Gateway** (`ws://127.0.0.1:18789`): WebSocket server, owns sessions, channels, routing
+- **Dashboard**: `http://127.0.0.1:18789/` — browser UI for chat, config, sessions
+- **Config**: `~/.openclaw/openclaw.json`
+- **CLI**: `openclaw` (Node.js), installed via `npm install -g openclaw@latest` or `curl -fsSL https://openclaw.ai/install.sh | bash`
+
+## Key config sections
+
+- `gateway.mode`: `"local"` for loopback-only
+- `models.providers`: define model backends (openai, anthropic, cursor, etc.)
+- `agents.defaults.model.primary`: default model like `cursor/auto`
+- `agents.defaults.sandbox`: Docker sandboxing config
+- `tools.allow` / `tools.deny`: tool allowlist/denylist
+
+## Tool groups
+
+- `group:runtime` → exec, bash, process
+- `group:fs` → read, write, edit, apply_patch
+- `group:sessions` → sessions_list, sessions_history, sessions_send
+- `group:web` → web_search, web_fetch
+- `group:ui` → browser, canvas
+
+## openclaw-cursor proxy
+
+This workspace includes the Go proxy that routes OpenClaw requests through Cursor Pro models via `cursor-agent`. Proxy listens on `:32125`, accepts OpenAI-compatible `/v1/chat/completions`.

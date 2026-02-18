@@ -1,0 +1,35 @@
+---
+description: Go conventions for the openclaw-cursor proxy codebase
+globs: openclaw/**/*.go
+alwaysApply: false
+---
+
+# openclaw-cursor Go conventions
+
+## Structure
+
+- `cmd/openclaw-cursor/` — CLI entry point (cobra commands)
+- `internal/server/` — HTTP proxy server
+- `internal/agent/` — cursor-agent process spawning
+- `internal/translator/` — OpenAI message → cursor-agent prompt
+- `internal/streaming/` — NDJSON → SSE conversion
+- `internal/models/` — model registry and resolution
+- `internal/errors/` — error parsing and OpenAI error format
+- `internal/config/` — config loading from file + env vars
+- `internal/tools/` — tool call interception and normalization
+
+## Patterns
+
+- Models are resolved by stripping `cursor/` or `cursor-acp/` prefix
+- cursor-agent is spawned per request with `--print --output-format stream-json --trust`
+- Streaming: scan NDJSON lines, convert to OpenAI SSE chunks with delta tracking
+- Non-streaming: collect all events, assemble final response
+- Errors: parse stderr, classify (quota, auth, model, network), return OpenAI error JSON
+- Config: file at `~/.openclaw/cursor-proxy.json`, env vars `OPENCLAW_CURSOR_*` override
+
+## Testing
+
+```bash
+make test          # all tests with race detector
+make lint          # golangci-lint
+```

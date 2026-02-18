@@ -1,0 +1,37 @@
+---
+description: Qubes OS networking model and qubes-network-server integration
+alwaysApply: true
+---
+
+# Qubes OS Networking
+
+## Default model
+
+- VMs are client-only; NetVM masquerades outbound traffic, blocks inbound
+- VMs get IPs in 10.137.x.x range, not reachable from LAN
+
+## qubes-network-server
+
+Extends Qubes so VMs can act as network servers (receive inbound traffic).
+
+### How it works
+
+1. **Dom0**: Extension writes `routing-method=forward` per VM IP into NetVM's Qubes DB
+2. **NetVM**: `qubes-routing-manager` daemon reads DB, configures:
+   - **nftables**: forward + postrouting accept rules (skip masquerade)
+   - **Proxy ARP/NDP**: NetVM answers ARP for server VM IPs on LAN
+
+### Enable a server VM
+
+```bash
+qvm-features <vm-name> routing-method forward
+```
+
+### Key packages
+
+- `qubes-core-admin-addon-network-server` (dom0)
+- `qubes-network-server` (NetVM template)
+
+### For OpenClaw integration
+
+The OpenClaw gateway VM needs `routing-method forward` so other VMs and LAN hosts can reach port 18789 (gateway) and 32125 (cursor proxy). The NetVM must have `qubes-network-server` installed.

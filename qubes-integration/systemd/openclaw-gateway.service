@@ -1,0 +1,17 @@
+[Unit]
+Description=OpenClaw Gateway
+After=network-online.target openclaw-cursor-proxy.service
+Wants=network-online.target
+Requires=openclaw-cursor-proxy.service
+
+[Service]
+Type=simple
+ExecStartPre=/bin/sleep 3
+ExecStart=%h/.npm-global/bin/openclaw gateway --port 18789
+Restart=on-failure
+RestartSec=5
+Environment=PATH=%h/.local/bin:%h/.npm-global/bin:/usr/local/bin:/usr/bin
+Environment=HOME=%h
+
+[Install]
+WantedBy=default.target
