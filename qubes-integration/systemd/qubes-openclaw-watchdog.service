@@ -1,0 +1,20 @@
+[Unit]
+Description=OpenClaw Health Watchdog (Qubes managed)
+ConditionPathExists=/var/run/qubes-service/openclaw-watchdog
+After=qubes-openclaw-proxy.service qubes-openclaw-gateway.service
+Wants=qubes-openclaw-proxy.service qubes-openclaw-gateway.service
+
+[Service]
+Type=simple
+User=user
+ExecStart=/home/user/qubes-claw/qubes-integration/scripts/openclaw-watchdog.sh
+Restart=always
+RestartSec=10
+Environment=PATH=/home/user/.local/bin:/home/user/.npm-global/bin:/usr/local/bin:/usr/bin
+Environment=HOME=/home/user
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=openclaw-watchdog
+
+[Install]
+WantedBy=multi-user.target

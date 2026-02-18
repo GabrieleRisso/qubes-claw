@@ -1,0 +1,49 @@
+{
+  "proxy": {
+    "port": 32125,
+    "host": "127.0.0.1"
+  },
+
+  "gateway": {
+    "port": 18789,
+    "bind": "lan",
+    "auth": {
+      "token": "CHANGE_ME_GENERATE_WITH_openssl_rand_hex_32"
+    }
+  },
+
+  "agents": {
+    "defaults": {
+      "model": "claude-3.5-sonnet",
+      "heartbeat": {
+        "enabled": true,
+        "interval": "30m"
+      }
+    }
+  },
+
+  "hooks": {
+    "enabled": true,
+    "token": "CHANGE_ME_GENERATE_WITH_openssl_rand_hex_32"
+  },
+
+  "cron": {
+    "enabled": true
+  },
+
+  "memory": {
+    "enabled": true
+  },
+
+  "browser": {
+    "enabled": true,
+    "defaultProfile": "chrome"
+  },
+
+  "logging": {
+    "level": "info",
+    "pretty": true
+  },
+
+  "compaction": "safeguard"
+}

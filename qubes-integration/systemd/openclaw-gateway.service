@@ -3,6 +3,8 @@ Description=OpenClaw Gateway
 After=network-online.target openclaw-cursor-proxy.service
 Wants=network-online.target
 Requires=openclaw-cursor-proxy.service
+StartLimitIntervalSec=300
+StartLimitBurst=5
 
 [Service]
 Type=simple
@@ -10,8 +12,15 @@ ExecStartPre=/bin/sleep 3
 ExecStart=%h/.npm-global/bin/openclaw gateway --port 18789 --bind lan
 Restart=on-failure
 RestartSec=5
+TimeoutStartSec=30
+TimeoutStopSec=10
 Environment=PATH=%h/.local/bin:%h/.npm-global/bin:/usr/local/bin:/usr/bin
 Environment=HOME=%h
+MemoryMax=1G
+TasksMax=128
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=openclaw-gateway
 
 [Install]
 WantedBy=default.target

@@ -1,0 +1,27 @@
+[Unit]
+Description=OpenClaw Cursor Proxy (Qubes managed)
+ConditionPathExists=/var/run/qubes-service/openclaw-proxy
+After=network-online.target qubes-sysinit.service
+Wants=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=user
+ExecStartPre=/home/user/qubes-claw/qubes-integration/scripts/openclaw-wait-ready.sh proxy
+ExecStart=/home/user/.local/bin/openclaw-cursor start
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=60
+TimeoutStopSec=10
+Environment=PATH=/home/user/.local/bin:/home/user/.npm-global/bin:/usr/local/bin:/usr/bin
+Environment=HOME=/home/user
+MemoryMax=512M
+TasksMax=64
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=openclaw-proxy
+
+[Install]
+WantedBy=multi-user.target

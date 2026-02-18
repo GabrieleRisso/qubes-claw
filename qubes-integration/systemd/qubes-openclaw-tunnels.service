@@ -1,0 +1,21 @@
+[Unit]
+Description=OpenClaw ConnectTCP Tunnels (Qubes managed - admin VM)
+ConditionPathExists=/var/run/qubes-service/openclaw-tunnels
+After=network-online.target qubes-sysinit.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=user
+ExecStart=/home/user/bin/openclaw-tunnel-daemon.sh
+Restart=on-failure
+RestartSec=10
+Environment=PATH=/usr/local/bin:/usr/bin
+Environment=HOME=/home/user
+Environment=OPENCLAW_SERVER_VM=visyble
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=openclaw-tunnels
+
+[Install]
+WantedBy=multi-user.target

@@ -1,8 +1,10 @@
 [Desktop Entry]
+Version=1.0
 Type=Application
 Name=OpenClaw Dashboard
-Comment=Open OpenClaw admin UI via ConnectTCP tunnel
-Exec=sh -c 'openclaw-connect & sleep 3; xdg-open "http://localhost:18789/"'
+Comment=Open OpenClaw web admin panel (tunnels must be running)
+Exec=sh -c 'TOKEN=$(python3 -c "import json; print(json.load(open(\"/home/user/.openclaw/openclaw.json\")).get(\"gateway\",{}).get(\"auth\",{}).get(\"token\",\"\"))" 2>/dev/null); xdg-open "http://localhost:18789/#token=${TOKEN:-}"'
 Icon=web-browser
 Terminal=false
-Categories=Network;
+Categories=Development;Network;
+StartupNotify=true

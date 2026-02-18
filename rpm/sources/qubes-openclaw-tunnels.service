@@ -1,0 +1,25 @@
+[Unit]
+Description=OpenClaw ConnectTCP Tunnels (Qubes managed)
+ConditionPathExists=/var/run/qubes-service/openclaw-tunnels
+After=qubes-sysinit.service network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=user
+ExecStart=/usr/share/openclaw-cursor/scripts/openclaw-tunnel-daemon.sh
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=60
+TimeoutStopSec=10
+Environment=HOME=/home/user
+MemoryMax=128M
+TasksMax=32
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=openclaw-tunnels
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,28 @@
+[Unit]
+Description=OpenClaw Gateway (Qubes managed)
+ConditionPathExists=/var/run/qubes-service/openclaw-gateway
+After=network-online.target qubes-sysinit.service qubes-openclaw-proxy.service
+Wants=network-online.target
+Requires=qubes-openclaw-proxy.service
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=user
+ExecStartPre=/usr/share/openclaw-cursor/scripts/openclaw-wait-ready.sh gateway
+ExecStart=/usr/bin/openclaw gateway --port 18789 --bind lan
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=90
+TimeoutStopSec=10
+Environment=PATH=/usr/local/bin:/usr/bin:/home/user/.local/bin:/home/user/.npm-global/bin
+Environment=HOME=/home/user
+MemoryMax=512M
+TasksMax=64
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=openclaw-gateway
+
+[Install]
+WantedBy=multi-user.target

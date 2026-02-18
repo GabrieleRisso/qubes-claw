@@ -1,0 +1,17 @@
+[Unit]
+Description=OpenClaw Health Watchdog
+After=openclaw-cursor-proxy.service openclaw-gateway.service
+Wants=openclaw-cursor-proxy.service openclaw-gateway.service
+
+[Service]
+Type=simple
+ExecStart=%h/qubes-claw/qubes-integration/scripts/openclaw-watchdog.sh
+Restart=always
+RestartSec=10
+Environment=PATH=%h/.local/bin:%h/.npm-global/bin:/usr/local/bin:/usr/bin
+Environment=HOME=%h
+Environment=OPENCLAW_WATCHDOG_INTERVAL=30
+Environment=OPENCLAW_WATCHDOG_THRESHOLD=3
+
+[Install]
+WantedBy=default.target

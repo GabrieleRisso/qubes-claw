@@ -28,10 +28,25 @@ cp "$SCRIPT_DIR"/qubes-openclaw-policy.spec "$TOPDIR/SPECS/"
 # Copy sources
 echo "[3/4] Copying source files..."
 cp "$SCRIPT_DIR"/sources/* "$TOPDIR/SOURCES/"
-cp "$REPO_DIR"/qubes-integration/systemd/*.service "$TOPDIR/SOURCES/"
+
+# System-level qubes-managed units (RPM versions with standard paths)
+# These are already in $SCRIPT_DIR/sources/ with correct /usr/bin paths
+# Only copy from qubes-integration if RPM-specific ones are missing
+for unit in qubes-openclaw-proxy qubes-openclaw-gateway qubes-openclaw-watchdog qubes-openclaw-tunnels; do
+    if [ ! -f "$TOPDIR/SOURCES/${unit}.service" ]; then
+        cp "$REPO_DIR/qubes-integration/systemd/${unit}.service" "$TOPDIR/SOURCES/" 2>/dev/null || true
+    fi
+done
+
+# Scripts
 cp "$REPO_DIR"/qubes-integration/scripts/setup-vm.sh "$TOPDIR/SOURCES/"
 cp "$REPO_DIR"/qubes-integration/scripts/monitor-dashboard.sh "$TOPDIR/SOURCES/"
+cp "$REPO_DIR"/qubes-integration/scripts/openclaw-watchdog.sh "$TOPDIR/SOURCES/"
+cp "$REPO_DIR"/qubes-integration/scripts/openclaw-wait-ready.sh "$TOPDIR/SOURCES/"
+cp "$REPO_DIR"/qubes-integration/scripts/openclaw-ctl "$TOPDIR/SOURCES/"
+cp "$REPO_DIR"/qubes-integration/scripts/openclaw-ctl "$TOPDIR/SOURCES/openclaw-ctl-client"
 cp "$REPO_DIR"/qubes-integration/scripts/client-connect.sh "$TOPDIR/SOURCES/openclaw-connect.sh"
+cp "$REPO_DIR"/qubes-integration/scripts/openclaw-tunnel-daemon.sh "$TOPDIR/SOURCES/"
 cp "$REPO_DIR"/qubes-integration/scripts/test-connecttcp.sh "$TOPDIR/SOURCES/"
 
 # Build RPMs

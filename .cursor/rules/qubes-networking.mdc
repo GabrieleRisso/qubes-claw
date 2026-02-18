@@ -20,21 +20,32 @@ Built-in qrexec service for safe TCP tunnelling between VMs. No network routing 
 2. **Client VM** runs `qvm-connect-tcp <local-port>:<target-vm>:<remote-port>`
 3. Traffic goes through **Xen vchan** (not the network stack) — fully isolated
 
-### Dom0 policy example
+### Dom0 policy (hardened — admin-only access)
 
 ```
 # /etc/qubes/policy.d/50-openclaw.policy
-qubes.ConnectTCP +32125 @anyvm openclaw-vm allow
-qubes.ConnectTCP +18789 @anyvm openclaw-vm allow
+
+# Only openclaw-admin can reach the server ports
+qubes.ConnectTCP +32125 openclaw-admin visyble allow
+qubes.ConnectTCP +18789 openclaw-admin visyble allow
+
+# Deny all other VMs
+qubes.ConnectTCP +32125 @anyvm visyble deny
+qubes.ConnectTCP +18789 @anyvm visyble deny
 ```
 
-### Client usage
+### Client usage (from openclaw-admin)
 
 ```bash
-qvm-connect-tcp 32125:openclaw-vm:32125
+qvm-connect-tcp 32125:visyble:32125
+qvm-connect-tcp 18789:visyble:18789
 curl http://localhost:32125/health
+xdg-open http://localhost:18789/#token=<token>
 ```
 
-### For OpenClaw integration
+### Security defaults
 
-The server VM runs proxy (:32125) and gateway (:18789). Client VMs use `qubes.ConnectTCP` to get local tunnels. No firewall holes, no IP forwarding, no qubes-network-server.
+- **openclaw-admin** firewall: DNS-only + drop-all (no internet, qrexec-only)
+- **visyble** firewall: outbound-only (needed for cursor-agent)
+- Both VMs tagged `ai-services` for Qubes Manager grouping
+- VM features store role, ports, and description for admin visibility

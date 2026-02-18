@@ -2,14 +2,24 @@
 Description=OpenClaw Cursor Proxy
 After=network-online.target
 Wants=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
 
 [Service]
 Type=simple
 ExecStart=%h/.local/bin/openclaw-cursor start
+ExecStartPost=/bin/sh -c 'sleep 3 && curl -sf http://127.0.0.1:32125/health > /dev/null'
 Restart=on-failure
 RestartSec=5
+TimeoutStartSec=30
+TimeoutStopSec=10
 Environment=PATH=%h/.local/bin:%h/.npm-global/bin:/usr/local/bin:/usr/bin
 Environment=HOME=%h
+MemoryMax=512M
+TasksMax=64
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=openclaw-proxy
 
 [Install]
 WantedBy=default.target

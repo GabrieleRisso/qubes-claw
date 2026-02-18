@@ -1,0 +1,25 @@
+[Unit]
+Description=OpenClaw Health Watchdog (Qubes managed)
+ConditionPathExists=/var/run/qubes-service/openclaw-watchdog
+After=qubes-openclaw-proxy.service qubes-openclaw-gateway.service
+Wants=qubes-openclaw-proxy.service qubes-openclaw-gateway.service
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=user
+ExecStart=/usr/share/openclaw-cursor/scripts/openclaw-watchdog.sh
+Restart=on-failure
+RestartSec=10
+TimeoutStartSec=30
+TimeoutStopSec=10
+Environment=HOME=/home/user
+MemoryMax=128M
+TasksMax=16
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=openclaw-watchdog
+
+[Install]
+WantedBy=multi-user.target

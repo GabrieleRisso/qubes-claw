@@ -1,8 +1,10 @@
 [Desktop Entry]
+Version=1.0
 Type=Application
 Name=OpenClaw Tunnels
-Comment=Auto-connect to OpenClaw server VM at login
-Exec=openclaw-connect
-Terminal=true
+Comment=Auto-connect to OpenClaw on visyble via ConnectTCP
+Exec=/usr/bin/openclaw-tunnel-daemon
+Terminal=false
 StartupNotify=false
 X-GNOME-Autostart-Delay=5
+Hidden=false
