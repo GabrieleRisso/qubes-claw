@@ -33,36 +33,41 @@
 \newtheorem{theorem}{Theorem}
 \newtheorem{property}{Property}
 
-% ─── Color Palette (Tokyo Night) ─────────────────────────────────
-\definecolor{bg}{HTML}{1A1B26}
-\definecolor{fg}{HTML}{C0CAF5}
-\definecolor{blue1}{HTML}{7AA2F7}
-\definecolor{blue2}{HTML}{2AC3DE}
-\definecolor{green1}{HTML}{9ECE6A}
-\definecolor{orange1}{HTML}{FF9E64}
-\definecolor{purple1}{HTML}{BB9AF7}
-\definecolor{red1}{HTML}{F7768E}
-\definecolor{yellow1}{HTML}{E0AF68}
-\definecolor{teal1}{HTML}{73DACA}
-\definecolor{cyan1}{HTML}{7DCFFF}
-\definecolor{gray1}{HTML}{565F89}
-\definecolor{gray2}{HTML}{414868}
+% ─── Academic Color Palette ───────────────────────────────────────
+\definecolor{bg}{HTML}{F5F5F0}
+\definecolor{fg}{HTML}{2D2D2D}
+\definecolor{blue1}{HTML}{2563EB}
+\definecolor{blue2}{HTML}{0891B2}
+\definecolor{green1}{HTML}{16A34A}
+\definecolor{orange1}{HTML}{D97706}
+\definecolor{purple1}{HTML}{7C3AED}
+\definecolor{red1}{HTML}{DC2626}
+\definecolor{yellow1}{HTML}{CA8A04}
+\definecolor{teal1}{HTML}{0D9488}
+\definecolor{cyan1}{HTML}{0284C7}
+\definecolor{gray1}{HTML}{6B7280}
+\definecolor{gray2}{HTML}{D1D5DB}
+\definecolor{codebg}{HTML}{F0F0EC}
+\definecolor{codefg}{HTML}{374151}
+\definecolor{codekw}{HTML}{1D4ED8}
+\definecolor{codestr}{HTML}{059669}
+\definecolor{codecmt}{HTML}{9CA3AF}
 
 % ─── Listings ─────────────────────────────────────────────────────
 \lstdefinestyle{code}{
-    backgroundcolor=\color{bg},
-    basicstyle=\ttfamily\fontsize{7}{8.5}\selectfont\color{fg},
-    keywordstyle=\color{blue1}\bfseries,
-    stringstyle=\color{green1},
-    commentstyle=\color{gray1}\itshape,
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\fontsize{6.5}{8}\selectfont\color{codefg},
+    keywordstyle=\color{codekw}\bfseries,
+    stringstyle=\color{codestr},
+    commentstyle=\color{codecmt}\itshape,
     frame=single,
     rulecolor=\color{gray2},
     breaklines=true,
     columns=fullflexible,
     xleftmargin=3pt,
     xrightmargin=3pt,
-    aboveskip=6pt,
-    belowskip=6pt,
+    aboveskip=5pt,
+    belowskip=5pt,
 }
 
 % ─── Hyperref ─────────────────────────────────────────────────────

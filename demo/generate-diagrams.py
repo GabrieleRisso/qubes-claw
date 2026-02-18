@@ -14,17 +14,17 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 W, H = 1200, 675
-BG = (15, 17, 23)
-FG = (230, 237, 243)
-SOFT = (139, 148, 158)
-BLUE = (56, 132, 244)
-GREEN = (63, 185, 80)
-ORANGE = (227, 139, 40)
-RED = (218, 54, 51)
-PURPLE = (137, 87, 229)
-BORDER = (48, 54, 61)
-CARD_BG = (22, 27, 34)
-ACCENT = (88, 166, 255)
+BG = (248, 248, 245)
+FG = (45, 45, 45)
+SOFT = (107, 114, 128)
+BLUE = (37, 99, 235)
+GREEN = (22, 163, 74)
+ORANGE = (217, 119, 6)
+RED = (220, 38, 38)
+PURPLE = (124, 58, 237)
+BORDER = (209, 213, 219)
+CARD_BG = (255, 255, 255)
+ACCENT = (8, 145, 178)
 
 FONT_PATHS = [
     "/usr/share/fonts/fira-code/FiraCode-Regular.ttf",
