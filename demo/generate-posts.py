@@ -14,16 +14,17 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 W, H = 1200, 675
-BG = (15, 17, 23)
-FG = (230, 237, 243)
-SOFT = (139, 148, 158)
-BLUE = (56, 132, 244)
-GREEN = (63, 185, 80)
-ORANGE = (227, 139, 40)
-PURPLE = (137, 87, 229)
-ACCENT = (88, 166, 255)
-BORDER = (48, 54, 61)
-CARD_BG = (22, 27, 34)
+BG = (248, 248, 245)
+FG = (45, 45, 45)
+SOFT = (107, 114, 128)
+BLUE = (37, 99, 235)
+GREEN = (22, 163, 74)
+ORANGE = (217, 119, 6)
+PURPLE = (124, 58, 237)
+ACCENT = (8, 145, 178)
+BORDER = (209, 213, 219)
+CARD_BG = (255, 255, 255)
+HEADER_BG = (37, 42, 52)
 
 FONT_PATHS = [
     "/usr/share/fonts/fira-code/FiraCode-Regular.ttf",
@@ -61,23 +62,23 @@ def draw_badge(draw, x, y, text, color=GREEN, size=11):
 
 
 def draw_header(draw, post_num, total=3):
-    draw_rounded_rect(draw, (0, 0, W, 60), fill=(10, 12, 18), outline=None, radius=0)
+    draw_rounded_rect(draw, (0, 0, W, 56), fill=HEADER_BG, outline=None, radius=0)
     fnt = load_font("bold", 20)
-    draw.text((30, 15), "qubes-claw", fill=ACCENT, font=fnt)
+    draw.text((30, 14), "qubes-claw", fill=(200, 210, 220), font=fnt)
 
-    fnt_sub = load_font("text", 13)
-    draw.text((180, 18), "AI agents on Qubes OS", fill=SOFT, font=fnt_sub)
+    fnt_sub = load_font("text", 12)
+    draw.text((180, 18), "AI agents on Qubes OS", fill=(139, 148, 158), font=fnt_sub)
 
-    draw_badge(draw, W - 100, 16, f"{post_num}/{total}", color=BLUE, size=13)
-    draw_badge(draw, W - 190, 16, "open source", color=GREEN, size=10)
+    draw_badge(draw, W - 100, 14, f"{post_num}/{total}", color=BLUE, size=12)
+    draw_badge(draw, W - 195, 14, "open source", color=GREEN, size=10)
 
 
 def draw_footer(draw, caption):
-    draw_rounded_rect(draw, (0, H - 55, W, H), fill=(10, 12, 18), outline=None, radius=0)
-    fnt = load_font("text", 13)
-    draw.text((30, H - 40), caption, fill=SOFT, font=fnt)
+    draw_rounded_rect(draw, (0, H - 50, W, H), fill=HEADER_BG, outline=None, radius=0)
+    fnt = load_font("text", 12)
+    draw.text((28, H - 37), caption, fill=(139, 148, 158), font=fnt)
     fnt_url = load_font("code", 10)
-    draw.text((W - 280, H - 35), "github.com/GabrieleRisso/qubes-claw", fill=BORDER, font=fnt_url)
+    draw.text((W - 310, H - 35), "github.com/GabrieleRisso/qubes-claw", fill=(90, 95, 105), font=fnt_url)
 
 
 def fit_image(img, box_w, box_h):
@@ -180,10 +181,10 @@ def post_3(diagdir, ssdir, outdir):
     draw_header(d, 3)
 
     term_y = 75
-    draw_rounded_rect(d, (30, term_y, W - 30, H - 65), fill=(13, 15, 20), outline=BORDER, radius=8)
+    draw_rounded_rect(d, (30, term_y, W - 30, H - 58), fill=(20, 22, 28), outline=BORDER, radius=10)
 
     # terminal title bar
-    draw_rounded_rect(d, (30, term_y, W - 30, term_y + 28), fill=(30, 35, 42), outline=None, radius=0)
+    draw_rounded_rect(d, (30, term_y, W - 30, term_y + 28), fill=(35, 38, 46), outline=None, radius=0)
     dots = [(50, term_y + 14), (68, term_y + 14), (86, term_y + 14)]
     colors = [(255, 95, 86), (255, 189, 46), (39, 201, 63)]
     for (cx, cy), clr in zip(dots, colors):
