@@ -266,77 +266,71 @@ a minimal, auditable communication channel.
 \begin{figure*}[t]
 \centering
 \begin{tikzpicture}[
-    >=Stealth,
-    node distance=0.5cm,
-    comp/.style={draw, rounded corners=4pt, minimum width=3.4cm,
-                 minimum height=0.65cm, font=\small\sffamily,
-                 thick, blur shadow={shadow blur steps=5,
-                 shadow xshift=0.5pt, shadow yshift=-0.5pt}},
-    domframe/.style={draw, rounded corners=8pt, thick, inner sep=12pt,
-                     minimum width=5cm},
-    tunnel/.style={->, line width=1.8pt, >=Stealth,
+    >=Stealth, scale=0.82, every node/.style={scale=0.82},
+    comp/.style={draw, rounded corners=3pt, minimum width=2.6cm,
+                 minimum height=0.55cm, font=\sffamily\fontsize{7}{8.5}\selectfont,
+                 thick},
+    domframe/.style={draw, rounded corners=6pt, thick, inner sep=8pt,
+                     minimum width=3.8cm},
+    tunnel/.style={->, line width=1.5pt, >=Stealth,
                    color=blue2, dashed,
                    postaction={decorate, decoration={markings,
                    mark=at position 0.5 with {\node[above=-1pt,
-                   font=\sffamily\fontsize{6}{7}\selectfont,
+                   font=\sffamily\fontsize{5.5}{6.5}\selectfont,
                    color=blue2] {vchan};}}}},
-    api/.style={->, thick, >=Stealth, color=purple1},
-    xlink/.style={->, thick, dashed, color=red1!60},
+    api/.style={->, thick, >=Stealth, color=purple1!70},
+    xlink/.style={->, thick, dashed, color=red1!50},
 ]
 
 % ── dom0 ──
-\node[domframe, fill=blue1!6, draw=blue1!70] (dom0) at (0,0) {};
-\node[font=\sffamily\bfseries\small, color=blue1!90,
-      anchor=north west] at ([xshift=4pt,yshift=-4pt]dom0.north west)
-    {dom0 \textnormal{\scriptsize (airgapped)}};
+\node[domframe, fill=blue1!5, draw=blue1!60] (dom0) at (0,0) {};
+\node[font=\sffamily\bfseries\fontsize{7.5}{9}\selectfont, color=blue1!85,
+      anchor=north west] at ([xshift=3pt,yshift=-3pt]dom0.north west)
+    {dom0 \textnormal{\fontsize{6}{7}\selectfont(airgapped)}};
 
-\node[comp, fill=blue1!18, draw=blue1!60, text=blue1!90,
-      below=0.6cm of dom0.north] (admin) {Admin Web \texttt{:9876}};
-\node[comp, fill=cyan1!12, draw=cyan1!50, text=cyan1!85,
-      below=0.2cm of admin] (tun32) {Tunnel \texttt{:32125}};
-\node[comp, fill=cyan1!12, draw=cyan1!50, text=cyan1!85,
-      below=0.2cm of tun32] (tun18) {Tunnel \texttt{:18789}};
-\node[font=\sffamily\fontsize{6}{7}\selectfont\itshape,
-      color=gray1, below=0.08cm of tun18]
-    (socat) {socat $\to$ qrexec-client $\to$ vchan};
+\node[comp, fill=blue1!14, draw=blue1!50, text=blue1!85,
+      below=0.45cm of dom0.north] (admin) {Admin Web \texttt{:9876}};
+\node[comp, fill=cyan1!10, draw=cyan1!40, text=cyan1!80,
+      below=0.15cm of admin] (tun32) {Tunnel \texttt{:32125}};
+\node[comp, fill=cyan1!10, draw=cyan1!40, text=cyan1!80,
+      below=0.15cm of tun32] (tun18) {Tunnel \texttt{:18789}};
+\node[font=\sffamily\fontsize{5}{6}\selectfont\itshape,
+      color=gray1, below=0.06cm of tun18]
+    (socat) {socat $\to$ qrexec-client};
 
 % ── Agent VM ──
-\node[domframe, fill=orange1!6, draw=orange1!70,
-      right=4.2cm of dom0] (vm) {};
-\node[font=\sffamily\bfseries\small, color=orange1!90,
-      anchor=north west] at ([xshift=4pt,yshift=-4pt]vm.north west)
-    {Agent VM \textnormal{\scriptsize (StandaloneVM)}};
+\node[domframe, fill=orange1!5, draw=orange1!60,
+      right=3.2cm of dom0] (vm) {};
+\node[font=\sffamily\bfseries\fontsize{7.5}{9}\selectfont, color=orange1!85,
+      anchor=north west] at ([xshift=3pt,yshift=-3pt]vm.north west)
+    {Agent VM \textnormal{\fontsize{6}{7}\selectfont(StandaloneVM)}};
 
-\node[comp, fill=orange1!18, draw=orange1!60, text=orange1!90,
-      below=0.6cm of vm.north] (proxy) {LLM Proxy \texttt{:32125}};
-\node[comp, fill=orange1!18, draw=orange1!60, text=orange1!90,
-      below=0.2cm of proxy] (gw) {Gateway \texttt{:18789}};
-\node[comp, fill=gray1!15, draw=gray1!40, text=gray1,
-      below=0.2cm of gw] (ctcp) {qubes.ConnectTCP};
+\node[comp, fill=orange1!14, draw=orange1!50, text=orange1!85,
+      below=0.45cm of vm.north] (proxy) {LLM Proxy \texttt{:32125}};
+\node[comp, fill=orange1!14, draw=orange1!50, text=orange1!85,
+      below=0.15cm of proxy] (gw) {Gateway \texttt{:18789}};
+\node[comp, fill=gray1!10, draw=gray1!35, text=gray1,
+      below=0.15cm of gw] (ctcp) {qubes.ConnectTCP};
 
 % ── LLM Providers ──
-\node[domframe, fill=purple1!6, draw=purple1!60,
-      right=3.8cm of vm, minimum height=3cm] (prov) {};
-\node[font=\sffamily\bfseries\small, color=purple1!90,
-      anchor=north west] at ([xshift=4pt,yshift=-4pt]prov.north west)
+\node[domframe, fill=purple1!4, draw=purple1!50,
+      right=2.8cm of vm, minimum height=2.4cm] (prov) {};
+\node[font=\sffamily\bfseries\fontsize{7.5}{9}\selectfont, color=purple1!85,
+      anchor=north west] at ([xshift=3pt,yshift=-3pt]prov.north west)
     {LLM Providers};
 
-\node[comp, fill=green1!12, draw=green1!50, text=green1!85,
-      minimum width=2.8cm, below=0.5cm of prov.north] (oai) {OpenAI API};
-\node[comp, fill=yellow1!12, draw=yellow1!50, text=yellow1!90,
-      minimum width=2.8cm, below=0.15cm of oai] (anth) {Anthropic API};
-\node[comp, fill=teal1!12, draw=teal1!50, text=teal1!85,
-      minimum width=2.8cm, below=0.15cm of anth] (ollama) {Ollama (local)};
-\node[comp, fill=gray1!10, draw=gray1!35, text=gray1,
-      minimum width=2.8cm, below=0.15cm of ollama] (custom) {Custom / VLLM};
+\node[comp, fill=green1!10, draw=green1!45, text=green1!80,
+      minimum width=2.2cm, below=0.4cm of prov.north] (oai) {OpenAI};
+\node[comp, fill=yellow1!10, draw=yellow1!45, text=yellow1!85,
+      minimum width=2.2cm, below=0.12cm of oai] (anth) {Anthropic};
+\node[comp, fill=teal1!10, draw=teal1!45, text=teal1!80,
+      minimum width=2.2cm, below=0.12cm of anth] (ollama) {Ollama};
 
 % ── Xen bar ──
-\node[draw, thick, fill=red1!8, draw=red1!60, rounded corners=4pt,
-      minimum width=17.5cm, minimum height=0.65cm,
-      font=\sffamily\bfseries\small, text=red1!80,
-      blur shadow={shadow blur steps=5, shadow xshift=0.5pt,
-      shadow yshift=-0.5pt},
-      below=1.3cm of vm.south] (xen)
+\node[draw, thick, fill=red1!6, draw=red1!50, rounded corners=3pt,
+      minimum width=13.5cm, minimum height=0.55cm,
+      font=\sffamily\bfseries\fontsize{7.5}{9}\selectfont, text=red1!75,
+      below=1cm of vm.south] (xen)
     {Xen Hypervisor --- Hardware Memory Isolation};
 
 % ── Tunnels ──
@@ -347,7 +341,6 @@ a minimal, auditable communication channel.
 \draw[api] (proxy.east) -- (oai.west);
 \draw[api] (proxy.east) -- (anth.west);
 \draw[api] (gw.east) -- (ollama.west);
-\draw[api, gray1!50] (gw.east) -- (custom.west);
 
 % ── Xen links ──
 \draw[xlink] (dom0.south) -- (xen.north -| dom0.south);
@@ -448,25 +441,29 @@ the others, following the principle of
 \begin{figure}[h]
 \centering
 \begin{tikzpicture}[
-    layer/.style={draw, rounded corners=5pt, thick,
-                  minimum height=0.85cm, font=\sffamily\small,
-                  text=white, align=center,
-                  blur shadow={shadow blur steps=5,
-                  shadow xshift=0.3pt, shadow yshift=-0.3pt}},
+    scale=0.88, every node/.style={scale=0.88},
+    layer/.style={draw, rounded corners=4pt, thick,
+                  minimum height=0.7cm,
+                  font=\sffamily\fontsize{7}{8.5}\selectfont,
+                  align=center},
 ]
-\node[layer, fill=red1!85, minimum width=7.4cm] (l1) at (0,0)
+\node[layer, fill=red1!12, draw=red1!50, text=red1!80,
+      minimum width=6.8cm] (l1) at (0.4,0)
     {\textbf{L1:} Xen Hypervisor Isolation};
-\node[layer, fill=orange1!85, minimum width=6cm] (l2) at (0,1.15)
+\node[layer, fill=orange1!12, draw=orange1!50, text=orange1!80,
+      minimum width=5.4cm] (l2) at (0.4,1.0)
     {\textbf{L2:} Qrexec Policy Engine};
-\node[layer, fill=blue1!85, minimum width=4.6cm] (l3) at (0,2.3)
+\node[layer, fill=blue1!12, draw=blue1!50, text=blue1!80,
+      minimum width=4.0cm] (l3) at (0.4,2.0)
     {\textbf{L3:} Port-Level Firewall};
-\node[layer, fill=purple1!85, minimum width=3.3cm] (l4) at (0,3.45)
+\node[layer, fill=purple1!12, draw=purple1!50, text=purple1!80,
+      minimum width=2.8cm] (l4) at (0.4,3.0)
     {\textbf{L4:} Token Auth};
 
-\draw[decorate, decoration={brace, amplitude=6pt, mirror},
-      thick, gray1] (3.9,0) -- (3.9,3.45)
-    node[midway, right=8pt, font=\sffamily\scriptsize,
-         text=gray1, align=left]
+\draw[decorate, decoration={brace, amplitude=5pt},
+      thick, gray1] (-3.1,0) -- (-3.1,3.0)
+    node[midway, left=7pt, font=\sffamily\fontsize{6.5}{8}\selectfont,
+         text=gray1, align=right]
     {Independent\\containment\\layers};
 \end{tikzpicture}
 \caption{\textbf{Defense-in-depth model.} Each layer provides containment

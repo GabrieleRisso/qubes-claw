@@ -69,6 +69,7 @@
 \citation{wallace2019universal}
 \citation{ohm2020backstabber}
 \citation{herder2006failure}
+\citation{poettering2010systemd}
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces \textbf  {System architecture.} Dashed blue lines represent vchan tunnels (Xen shared memory, not TCP/IP). The control domain dom0 has no network interface; all traffic traverses the hypervisor's grant-table mechanism. The agent VM connects to external LLM providers via standard HTTPS.}}{3}{figure.caption.1}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
 \newlabel{fig:architecture}{{1}{3}{\textbf {System architecture.} Dashed blue lines represent vchan tunnels (Xen shared memory, not TCP/IP). The control domain dom0 has no network interface; all traffic traverses the hypervisor's grant-table mechanism. The agent VM connects to external LLM providers via standard HTTPS}{figure.caption.1}{}}
@@ -80,17 +81,24 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Layer 3: Port-Level Firewall}{3}{subsection.4.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Layer 4: Gateway Token Authentication}{3}{subsection.4.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Formal Threat Analysis}{3}{subsection.4.5}\protected@file@percent }
-\citation{poettering2010systemd}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Persistence and Lifecycle}{3}{section.5}\protected@file@percent }
+\newlabel{sec:persistence}{{5}{3}{Persistence and Lifecycle}{section.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Boot dependency chain. Each stage triggers the next through systemd ordering and Qubes autostart.}}{3}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:boot}{{3}{3}{Boot dependency chain. Each stage triggers the next through systemd ordering and Qubes autostart}{figure.caption.5}{}}
 \citation{kwon2023vllm}
 \citation{agache2020firecracker}
 \citation{rutkowska2010qubes}
 \citation{qubes2023splitgpg}
+\citation{sultan2019container}
+\citation{lin2018measurement}
+\citation{young2019gvisor}
+\citation{agache2020firecracker}
+\citation{xi2023rise}
+\citation{greshake2023youve}
+\citation{ruan2024toolemu}
+\citation{wei2024jailbroken}
 \@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Threat model with containment mapping.}}{4}{table.caption.4}\protected@file@percent }
 \newlabel{tab:threats}{{2}{4}{Threat model with containment mapping}{table.caption.4}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Persistence and Lifecycle}{4}{section.5}\protected@file@percent }
-\newlabel{sec:persistence}{{5}{4}{Persistence and Lifecycle}{section.5}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Boot dependency chain. Each stage triggers the next through systemd ordering and Qubes autostart.}}{4}{figure.caption.5}\protected@file@percent }
-\newlabel{fig:boot}{{3}{4}{Boot dependency chain. Each stage triggers the next through systemd ordering and Qubes autostart}{figure.caption.5}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Persistence mechanisms for each component.}}{4}{table.caption.6}\protected@file@percent }
 \newlabel{tab:persistence}{{3}{4}{Persistence mechanisms for each component}{table.caption.6}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {6}Evaluation}{4}{section.6}\protected@file@percent }
@@ -106,14 +114,6 @@
 \newlabel{tab:comparison}{{6}{4}{Isolation comparison across containment approaches}{table.caption.9}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {7}Related Work}{4}{section.7}\protected@file@percent }
 \newlabel{sec:related}{{7}{4}{Related Work}{section.7}{}}
-\citation{sultan2019container}
-\citation{lin2018measurement}
-\citation{young2019gvisor}
-\citation{agache2020firecracker}
-\citation{xi2023rise}
-\citation{greshake2023youve}
-\citation{ruan2024toolemu}
-\citation{wei2024jailbroken}
 \citation{costan2016intel}
 \citation{sardar2022demystifying}
 \citation{kaplan2016amd}
@@ -137,14 +137,14 @@
 \citation{cve2025runc}
 \bibcite{rutkowska2010qubes}{1}
 \bibcite{barham2003xen}{2}
-\@writefile{toc}{\contentsline {section}{\numberline {8}Discussion}{5}{section.8}\protected@file@percent }
-\newlabel{sec:discussion}{{8}{5}{Discussion}{section.8}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {9}Conclusion}{5}{section.9}\protected@file@percent }
-\newlabel{sec:conclusion}{{9}{5}{Conclusion}{section.9}{}}
 \bibcite{openai2024agents}{3}
 \bibcite{anthropic2024claude}{4}
 \bibcite{xi2023rise}{5}
 \bibcite{greshake2023youve}{6}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Discussion}{5}{section.8}\protected@file@percent }
+\newlabel{sec:discussion}{{8}{5}{Discussion}{section.8}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {9}Conclusion}{5}{section.9}\protected@file@percent }
+\newlabel{sec:conclusion}{{9}{5}{Conclusion}{section.9}{}}
 \bibcite{perez2022ignore}{7}
 \bibcite{liu2024prompt}{8}
 \bibcite{ji2023survey}{9}
