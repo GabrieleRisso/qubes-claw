@@ -1,0 +1,25 @@
+{
+  "gateway": {
+    "mode": "local",
+    "port": 18789,
+    "bind": "loopback",
+    "auth": { "mode": "token", "token": "dom0-local" }
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "ollama": {
+        "baseUrl": "http://127.0.0.1:11434/v1",
+        "api": "openai-completions",
+        "models": [
+          { "id": "llama3.3:70b", "name": "Llama 3.3 70B", "contextWindow": 128000, "maxTokens": 8192 },
+          { "id": "qwen2.5-coder:32b", "name": "Qwen 2.5 Coder 32B", "contextWindow": 128000, "maxTokens": 8192 },
+          { "id": "deepseek-r1:32b", "name": "DeepSeek R1 32B", "reasoning": true, "contextWindow": 128000, "maxTokens": 8192 }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": { "model": { "primary": "ollama/llama3.3:70b" } }
+  }
+}

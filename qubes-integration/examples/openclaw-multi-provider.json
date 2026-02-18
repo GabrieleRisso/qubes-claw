@@ -1,0 +1,46 @@
+{
+  "gateway": {
+    "mode": "local",
+    "port": 18789,
+    "bind": "loopback",
+    "auth": { "mode": "token", "token": "dom0-local" }
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "cursor": {
+        "baseUrl": "http://127.0.0.1:32125/v1",
+        "api": "openai-completions",
+        "models": [
+          { "id": "auto", "name": "Cursor Auto", "contextWindow": 200000, "maxTokens": 8192 }
+        ]
+      },
+      "openai": {
+        "baseUrl": "https://api.openai.com/v1",
+        "api": "openai-completions",
+        "apiKey": "${OPENAI_API_KEY}",
+        "models": [
+          { "id": "gpt-4o", "name": "GPT-4o", "contextWindow": 128000, "maxTokens": 16384 }
+        ]
+      },
+      "anthropic": {
+        "baseUrl": "https://api.anthropic.com/v1",
+        "api": "anthropic",
+        "apiKey": "${ANTHROPIC_API_KEY}",
+        "models": [
+          { "id": "claude-sonnet-4-20250514", "name": "Claude Sonnet 4", "contextWindow": 200000, "maxTokens": 8192 }
+        ]
+      },
+      "ollama": {
+        "baseUrl": "http://127.0.0.1:11434/v1",
+        "api": "openai-completions",
+        "models": [
+          { "id": "llama3.3:70b", "name": "Llama 3.3 70B (local)", "contextWindow": 128000, "maxTokens": 8192 }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": { "model": { "primary": "cursor/auto" } }
+  }
+}

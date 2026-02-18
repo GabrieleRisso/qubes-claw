@@ -1,0 +1,13 @@
+[Unit]
+Description=OpenClaw port tunnel to %I via qrexec (%i)
+After=qubesd.service
+Wants=qubesd.service
+
+[Service]
+Type=simple
+ExecStart=/bin/sh -c "exec /usr/bin/socat TCP-LISTEN:%i,bind=127.0.0.1,fork,reuseaddr \"EXEC:/usr/local/bin/openclaw-tcp-forward %i\""
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

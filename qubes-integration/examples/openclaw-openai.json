@@ -1,0 +1,27 @@
+{
+  "gateway": {
+    "mode": "local",
+    "port": 18789,
+    "bind": "loopback",
+    "auth": { "mode": "token", "token": "dom0-local" }
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "openai": {
+        "baseUrl": "https://api.openai.com/v1",
+        "api": "openai-completions",
+        "apiKey": "${OPENAI_API_KEY}",
+        "models": [
+          { "id": "gpt-4o", "name": "GPT-4o", "contextWindow": 128000, "maxTokens": 16384 },
+          { "id": "gpt-4o-mini", "name": "GPT-4o Mini", "contextWindow": 128000, "maxTokens": 16384 },
+          { "id": "o1", "name": "o1", "reasoning": true, "contextWindow": 200000, "maxTokens": 100000 },
+          { "id": "o3-mini", "name": "o3-mini", "reasoning": true, "contextWindow": 200000, "maxTokens": 100000 }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": { "model": { "primary": "openai/gpt-4o" } }
+  }
+}

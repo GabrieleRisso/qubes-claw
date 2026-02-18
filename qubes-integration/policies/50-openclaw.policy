@@ -1,0 +1,20 @@
+## OpenClaw qrexec policy — controls which VMs can reach the server
+##
+## Server VM must be tagged: qvm-tags <vm> add openclaw-server
+## Client VMs must be tagged: qvm-tags <vm> add openclaw-client
+##
+## Ports:
+##   32125 = OpenAI-compatible proxy API
+##   18789 = Gateway dashboard + WebSocket
+
+## Tagged client access (preferred — just tag new VMs)
+qubes.ConnectTCP +32125 @tag:openclaw-client @tag:openclaw-server allow
+qubes.ConnectTCP +18789 @tag:openclaw-client @tag:openclaw-server allow
+
+## Dom0 tunnel access (for airgapped admin)
+qubes.ConnectTCP +32125 dom0 @tag:openclaw-server allow
+qubes.ConnectTCP +18789 dom0 @tag:openclaw-server allow
+
+## Deny all other access to server ports
+qubes.ConnectTCP +32125 @anyvm @tag:openclaw-server deny
+qubes.ConnectTCP +18789 @anyvm @tag:openclaw-server deny

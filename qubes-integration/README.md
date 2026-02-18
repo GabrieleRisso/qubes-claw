@@ -1,8 +1,10 @@
-# Qubes OS + OpenClaw + Cursor Proxy
+# Qubes OS + OpenClaw Integration
 
 Run OpenClaw and the Cursor proxy inside a Qubes VM. A dedicated admin VM connects safely through `qubes.ConnectTCP` (qrexec) -- no raw network routing needed.
 
 ## Architecture
+
+### Tunnel mode (default — airgapped)
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -55,7 +57,7 @@ This:
 - Writes a hardened `qubes.ConnectTCP` policy (admin-only, deny all others)
 - Locks `openclaw-admin` firewall to DNS-only (qrexec doesn't need internet)
 
-### 2. Server VM: install everything
+### Step 2: VM
 
 ```bash
 # Inside visyble
@@ -65,6 +67,7 @@ bash setup-vm.sh
 ### 3. Server VM: authenticate and start
 
 ```bash
+# Cursor only: authenticate
 openclaw-cursor login
 systemctl --user enable --now openclaw-cursor-proxy openclaw-gateway
 ```
@@ -82,12 +85,16 @@ Then open the dashboard:
 xdg-open http://localhost:18789/#token=<your-token>
 ```
 
-### 5. Docker alternative (server VM)
+## Changing providers
+
+Edit `~/.openclaw/openclaw.json` in the VM. Example configs are in `examples/`:
 
 ```bash
-git clone https://github.com/GabrieleRisso/openclaw-cursor.git
-cd openclaw-cursor
-docker compose up -d
+# Switch to OpenAI
+cp examples/openclaw-openai.json ~/.openclaw/openclaw.json
+# Edit: replace ${OPENAI_API_KEY} with your key
+vim ~/.openclaw/openclaw.json
+systemctl --user restart openclaw-gateway
 ```
 
 ## ConnectTCP policy (dom0)
