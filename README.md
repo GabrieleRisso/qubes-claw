@@ -1,50 +1,51 @@
-# qubes-claw
-
-**Secure, isolated AI agent infrastructure on Qubes OS.**
-
-Run [OpenClaw](https://openclaw.ai) AI agents in Xen-isolated virtual machines with airgapped administration from dom0, multi-provider LLM support, and zero-touch reboot persistence.
-
-> **Paper:** A full academic paper with formal threat model, TikZ diagrams, and latency benchmarks is available in [`paper/`](paper/).
+# qubes-claw: Hypervisor-Isolated Infrastructure for Autonomous LLM Agents
 
 [![License](https://img.shields.io/badge/license-GPL--2.0-blue.svg)](LICENSE)
+[![Paper](https://img.shields.io/badge/paper-PDF-b31b1b.svg)](paper/qubes-claw.pdf)
+[![LaTeX](https://img.shields.io/badge/source-LaTeX-008080.svg)](paper/qubes-claw.tex)
+
+> **Risso, G. (2026).** *Hypervisor-Isolated Infrastructure for Autonomous LLM Agents on Qubes OS.*
+> [[PDF]](paper/qubes-claw.pdf) [[LaTeX Source]](paper/qubes-claw.tex) [[Blog Post]](paper/blog-qubes-claw.md)
 
 ---
 
-## Why This Exists
+## Abstract
 
-LLM agents routinely execute shell commands, modify file systems, and manage credentials. This creates an expanding attack surface that containers cannot adequately contain — Docker shares the host kernel (~400 syscalls exposed), and SELinux can't stop exfiltration through legitimate channels.
+Autonomous LLM agents increasingly execute shell commands, modify file systems, and manage credentials with developer-level privileges. Existing containment approaches based on Linux containers share the host kernel, exposing approximately 400 syscalls as attack surface -- a limitation underscored by three critical runc container escape CVEs disclosed in November 2025 (CVE-2025-31133, CVE-2025-52565, CVE-2025-52881). The 2025 OpenAgentSafety benchmark reports unsafe behavior in 51--73% of safety-critical tasks across five frontier LLMs.
 
-**qubes-claw** solves this by running AI agents in Xen-isolated VMs while providing airgapped administration from dom0 — the most privileged domain with **zero network interfaces**. The key insight: the administration interface doesn't need network access; it only needs structured data flow from the agent VM, which Xen's shared memory transport (qrexec) provides with hardware-enforced guarantees.
+This work presents **qubes-claw**, an open-source framework that confines autonomous AI agents within Xen-isolated virtual machines on Qubes OS. The administration interface operates from dom0 -- a control domain with *no network interface* -- communicating with agent VMs exclusively through qrexec, a shared-memory RPC mechanism that bypasses the network stack entirely. Four independent security layers (hypervisor isolation, qrexec policies, port restrictions, token authentication) provide defense-in-depth containment. The architecture adds less than 5ms latency per API call and survives host reboots with zero manual intervention.
+
+## Key Findings
+
+| Finding | Result |
+|---------|--------|
+| **Latency overhead** | 4.8ms per qrexec hop (vs. 500ms--30s LLM inference) |
+| **Security layers** | 4 independent layers; breaching one does not compromise others |
+| **Reboot persistence** | Zero-touch: VM autostart + systemd + qrexec policies |
+| **Agent unsafe behavior** | 51--73% in safety-critical tasks (OpenAgentSafety, 2025) |
+| **Container escape CVEs (2025)** | 3 critical runc CVEs exploiting mount race conditions |
+| **Implementation** | Open source, multi-provider (OpenAI, Anthropic, Ollama) |
 
 ## Architecture
 
 ```
-  dom0 (airgapped)                           Agent VM (StandaloneVM)
- ┌────────────────────────┐                 ┌────────────────────────┐
- │                        │    qrexec       │                        │
- │  Admin Web    :9876    │   (Xen vchan)   │  Cursor Proxy  :32125  │──→ Cursor Pro
- │  Tunnel       :32125 ══╪════════════════╪══ Gateway      :18789  │──→ OpenAI
- │  Tunnel       :18789 ══╪════════════════╪══ ConnectTCP           │──→ Anthropic
- │                        │   NOT TCP/IP    │                        │──→ Ollama
- │  (no network stack)    │                 │  (has network access)  │
- └────────────────────────┘                 └────────────────────────┘
-              │                                          │
-              └──────────── Xen Hypervisor ──────────────┘
-                     Hardware-Enforced Isolation
+dom0 (airgapped)                             Agent VM (StandaloneVM)
+┌────────────────────────┐                  ┌────────────────────────┐
+│                        │    qrexec        │                        │
+│  Admin Web    :9876    │   (Xen vchan)    │  LLM Proxy     :32125 │──→ OpenAI
+│  Tunnel       :32125 ══╪═════════════════╪══ Gateway       :18789 │──→ Anthropic
+│  Tunnel       :18789 ══╪═════════════════╪══ ConnectTCP           │──→ Ollama
+│                        │   NOT TCP/IP     │                        │
+│  (no network stack)    │                  │  (has network access)  │
+└────────────────────────┘                  └────────────────────────┘
+             │                                          │
+             └──────────── Xen Hypervisor ──────────────┘
+                    Hardware-Enforced Isolation
 ```
 
-Communication between dom0 and the agent VM uses **qrexec tunnels over Xen shared memory pages** (`vchan`), not TCP/IP networking. dom0 binds only to `127.0.0.1` — there is no network interface to attack.
+The key architectural insight: the administration interface requires only structured data from the agent VM, which Xen's shared-memory transport provides with hardware-enforced guarantees. No network stack is involved.
 
-### Deployment Modes
-
-| Mode | Security | Access | Use case |
-|------|----------|--------|----------|
-| **Tunnel** (default) | Airgapped — dom0 only | `localhost:32125`, `localhost:18789` | Personal workstation |
-| **Network** | LAN-reachable | `10.137.0.100:32125` from any VM/host | Shared team server |
-
-## Defense in Depth — Four Security Layers
-
-Each layer provides independent containment. Breaching one does not compromise the others.
+## Defense in Depth
 
 ```
 ┌──────────────────────────────────────┐
@@ -58,229 +59,195 @@ Each layer provides independent containment. Breaching one does not compromise t
 └──────────────────────────────────────┘
 ```
 
-| Layer | What It Stops | How |
-|-------|--------------|-----|
-| **L1: Xen Hypervisor** | VM escape, memory access | Hardware-enforced isolation — root in agent VM cannot touch dom0 |
-| **L2: Qrexec Policies** | Unauthorized VM communication | Only `@tag:openclaw-client` VMs can connect; everything else denied |
-| **L3: Port Restrictions** | Lateral movement | ConnectTCP handler only forwards to whitelisted ports |
-| **L4: Token Auth** | Unauthorized dashboard access | Gateway requires token; default `dom0-local` for localhost tunnels |
+| Layer | Threat Mitigated | Mechanism |
+|-------|-----------------|-----------|
+| L1: Xen Hypervisor | VM escape, cross-VM memory access | Hardware-enforced VT-x/VT-d isolation |
+| L2: Qrexec Policies | Unauthorized VM communication | Tag-based declarative rules (`@tag:openclaw-client`) |
+| L3: Port Restrictions | Service enumeration, lateral movement | ConnectTCP whitelist |
+| L4: Token Auth | Unauthenticated dashboard access | WebSocket gateway token |
 
-### Threat Model
+## Comparative Analysis
 
-| Attack Vector | Mitigation |
-|--------------|------------|
-| Agent escapes container | Impossible — agent runs in a full Xen VM, not a container |
-| Agent probes other VMs | Qrexec policy: deny by default, tag-based allow |
-| Agent opens backdoor port | ConnectTCP only forwards whitelisted ports |
-| Stolen WebSocket connection | Token authentication required |
-| Agent exfiltrates data | Network policy + audit logging |
-| Remote exploit on admin | dom0 has no network interface — physically impossible |
-
-### Comparison with Alternatives
-
-| Property | Docker | gVisor | **qubes-claw** |
-|----------|--------|--------|----------------|
-| Kernel isolation | No | Partial | **Yes (Xen)** |
-| Memory isolation | No | No | **Yes (hardware)** |
-| Airgapped admin | No | No | **Yes** |
-| Network isolation | Partial | Partial | **Yes** |
-| Multi-provider | Yes | Yes | **Yes** |
-| Reboot persistence | Yes | Yes | **Yes** |
-| Latency overhead | <1ms | ~5ms | **~4ms** |
+| Property | Docker | gVisor | Firecracker | **qubes-claw** |
+|----------|--------|--------|-------------|----------------|
+| Kernel isolation | No | Partial | Yes | **Yes (Xen)** |
+| Memory isolation | No | No | Yes | **Yes (hardware)** |
+| Airgapped admin | No | No | No | **Yes** |
+| Network isolation | Partial | Partial | Yes | **Yes** |
+| Reboot persistence | Yes | Yes | Manual | **Yes (zero-touch)** |
+| Latency overhead | <1ms | ~5ms | ~3ms | **~4ms** |
 
 ## Performance
 
-The qrexec tunnel adds ~4ms per API call — negligible against LLM inference times (500ms–30s). For streaming responses, overhead is connection-setup only.
+Measured on Qubes OS 4.3, Intel i7-1365U. Each measurement comprises 50 iterations.
 
-| Path | Latency | Overhead |
-|------|---------|----------|
-| VM localhost (direct) | 1.2ms | — |
+| Path | p50 Latency | Overhead |
+|------|-------------|----------|
+| VM localhost (direct) | 1.2ms | -- |
 | dom0 → qrexec → VM | 4.8ms | +3.6ms |
 | dom0 → tunnel → VM | 5.1ms | +3.9ms |
 
-Resource footprint: ~400MB total beyond provider requirements (two socat processes + admin web on dom0, proxy + gateway on VM).
+The qrexec overhead is negligible against LLM inference times (500ms--30s). For streaming, overhead is connection-setup only.
 
-## Supported Providers
+## Threat Model
 
-| Provider | Auth | Network | Models |
-|----------|------|---------|--------|
-| **Cursor Pro** | Session | HTTPS | Auto, GPT-5, Claude 4 |
-| **OpenAI** | API key | HTTPS | GPT-4o, o1, o3-mini |
-| **Anthropic** | API key | HTTPS | Sonnet 4, Opus 4 |
-| **Ollama** | None | Local | Llama 3, Qwen, DeepSeek |
+| Attack Vector | Mitigation | Layer |
+|--------------|------------|-------|
+| Agent escapes container | Impossible -- full Xen VM, not a container | L1 |
+| Agent probes other VMs | Qrexec deny-by-default, tag-based allow | L2 |
+| Agent opens backdoor port | ConnectTCP whitelist | L3 |
+| Stolen WebSocket connection | Token authentication | L4 |
+| Agent exfiltrates data | Network policy + audit logging | L2 |
+| Remote exploit on admin panel | dom0 has no NIC -- physically impossible | L1 |
 
-All providers expose a unified OpenAI-compatible API on port 32125. Switch providers by editing `~/.openclaw/openclaw.json` — no code changes needed.
+## Research Context (2025--2026)
 
-## Quick Start
+This work is situated relative to the following contemporary research:
 
-### 1. Dom0 setup
+| Reference | Venue | Contribution | Relation |
+|-----------|-------|-------------|----------|
+| IsolateGPT (Wu et al.) | NDSS 2025 | Execution isolation for LLM agents | Application-layer; qubes-claw provides hardware foundation |
+| Progent (Chen et al.) | arXiv 2025 | Privilege control via DSL policies | Composable with qubes-claw's transport isolation |
+| CaMeL (Debenedetti et al.) | arXiv 2025 | Control/data separation vs. prompt injection | Complementary defense at LLM layer |
+| OS-Harm (Wu et al.) | arXiv 2025 | Safety benchmark for computer-use agents | All frontier models remain vulnerable |
+| OpenAgentSafety (Aimeur et al.) | arXiv 2025 | 51--73% unsafe behavior in safety tasks | Motivates hardware isolation |
+| QSB-108 | Qubes 2025 | XSA-471 transitive scheduler attacks | Microarchitectural threat to hypervisors |
+| runc CVE-2025-* | NVD 2025 | Three container escape CVEs | Demonstrates container insufficiency |
+
+The full paper cites 50+ sources. See [`paper/qubes-claw.pdf`](paper/qubes-claw.pdf).
+
+---
+
+## Reproducing the Results
+
+### System Requirements
+
+- Qubes OS 4.2+ (tested on 4.3)
+- x86-64 hardware with VT-x/VT-d
+- Python 3.8+
+
+### Quick Start
 
 ```bash
-git clone https://github.com/GabrieleRisso/qubes-claw.git
-cd qubes-claw
+# dom0: create VM + tunnels + policies
+bash qubes-integration/scripts/setup-dom0.sh my-agent-vm fedora-41 sys-net 10.137.0.100 tunnel
 
-# Airgapped tunnel mode (recommended)
-bash qubes-integration/scripts/setup-dom0.sh my-openclaw-vm fedora-41 sys-net 10.137.0.100 tunnel
-
-# Or: LAN-reachable mode
-bash qubes-integration/scripts/setup-dom0.sh my-openclaw-vm fedora-41 sys-net 10.137.0.100 network
+# VM: install LLM provider
+qvm-run -p my-agent-vm 'bash /path/to/qubes-claw/qubes-integration/scripts/setup-vm.sh openai'
+# alternatives: anthropic, ollama
 ```
 
-### 2. VM setup
+### Verify
 
 ```bash
-qvm-start my-openclaw-vm
-
-# Pick your provider:
-qvm-run -p my-openclaw-vm 'bash /path/to/qubes-claw/qubes-integration/scripts/setup-vm.sh cursor'
-# Or: openai, anthropic, ollama
-```
-
-### 3. Start services
-
-Inside the VM:
-
-```bash
-# Cursor provider: log in first
-openclaw-cursor login
-systemctl --user start openclaw-cursor-proxy openclaw-gateway
-
-# Other providers: just start the gateway
-systemctl --user start openclaw-gateway
-```
-
-### 4. Access from dom0
-
-```bash
-curl http://127.0.0.1:32125/health                     # API health check
+curl http://127.0.0.1:32125/health                     # API health
 firefox http://127.0.0.1:18789#token=dom0-local          # Dashboard
-curl http://127.0.0.1:32125/v1/chat/completions \        # Chat completion
+curl http://127.0.0.1:32125/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"model":"auto","messages":[{"role":"user","content":"hello"}]}'
 ```
 
-## Provider Configs
+### Supported Providers
 
-Example configs in `qubes-integration/examples/`:
+| Provider | Authentication | Transport | Models |
+|----------|---------------|-----------|--------|
+| OpenAI | API key | HTTPS | GPT-4o, o1, o3-mini |
+| Anthropic | API key | HTTPS | Sonnet 4, Opus 4 |
+| Ollama | None | Local | Llama 3, Qwen, DeepSeek |
 
-| File | Provider | Auth |
-|------|----------|------|
-| `openclaw-cursor.json` | Cursor Pro (via proxy) | Cursor login |
-| `openclaw-openai.json` | OpenAI API | `OPENAI_API_KEY` |
-| `openclaw-anthropic.json` | Anthropic API | `ANTHROPIC_API_KEY` |
-| `openclaw-ollama.json` | Ollama (local) | None |
-| `openclaw-multi-provider.json` | All of the above | Mixed |
+All providers expose a unified OpenAI-compatible API on port 32125.
 
-To switch providers:
+### Reboot Persistence
 
-```bash
-cp qubes-integration/examples/openclaw-openai.json ~/.openclaw/openclaw.json
-# Edit to add your API key, then restart:
-systemctl --user restart openclaw-gateway
-```
-
-## Reboot Persistence
-
-Everything auto-starts with zero manual intervention:
-
-| Component | Where | Mechanism |
-|-----------|-------|-----------|
+| Component | Location | Mechanism |
+|-----------|----------|-----------|
 | Agent VM | dom0 | `qvm-prefs autostart True` |
-| Cursor proxy | VM | systemd user service + loginctl linger |
+| LLM proxy | VM | systemd user service + loginctl linger |
 | Gateway | VM | systemd user service + loginctl linger |
 | qrexec tunnels | dom0 | systemd system services |
-| ConnectTCP handler | VM | `/etc/qubes-rpc/` (persistent on StandaloneVM) |
+| ConnectTCP handler | VM | `/etc/qubes-rpc/` (StandaloneVM) |
 | Policies | dom0 | `/etc/qubes/policy.d/` |
-| Admin web | dom0 | systemd system unit |
 
-Boot sequence: **Xen → dom0 init → qubesd → VM autostart → systemd user services** — fully automatic.
+Boot sequence: Xen → dom0 init → qubesd → VM autostart → systemd user services. Fully automatic.
 
-## Adding Client VMs
-
-Tag any VM as an OpenClaw client to give it API access:
+### Adding Client VMs
 
 ```bash
 # In dom0
 qvm-tags my-other-vm add openclaw-client
 
 # From that VM
-curl http://10.137.0.100:32125/health   # network mode
-# or through qrexec ConnectTCP           # tunnel mode
+curl http://10.137.0.100:32125/health
 ```
 
-## Repo Layout
+---
+
+## Publication Assets
+
+Run `make all` inside `paper/` to rebuild the paper, diagrams, and social media content.
+
+| Asset | Path | Description |
+|-------|------|-------------|
+| **Paper (PDF)** | [`paper/qubes-claw.pdf`](paper/qubes-claw.pdf) | 7 pages, 50+ references |
+| **LaTeX source** | [`paper/qubes-claw.tex`](paper/qubes-claw.tex) | TikZ diagrams embedded |
+| **Blog post** | [`paper/blog-qubes-claw.md`](paper/blog-qubes-claw.md) | Website-ready (frontmatter) |
+| **Social media** | [`paper/posts.md`](paper/posts.md) | X, LinkedIn, Dev.to, HN, Reddit |
+| **Architecture fig.** | [`demo/architecture.png`](demo/architecture.png) | 1200x675 |
+| **Security fig.** | [`demo/security.png`](demo/security.png) | 1200x675 |
+| **Persistence fig.** | [`demo/persistence.png`](demo/persistence.png) | 1200x675 |
+| **Build manifest** | [`paper/MANIFEST.md`](paper/MANIFEST.md) | Dependencies + asset inventory |
+
+### Build Dependencies
+
+```
+pdflatex (texlive-latex, texlive-pgf, texlive-amsfonts)
+python3 + Pillow (python3-pillow)
+```
+
+---
+
+## Repository Structure
 
 ```
 qubes-claw/
-├── qubes-integration/
-│   ├── scripts/
-│   │   ├── setup-dom0.sh              # Dom0 installer (tunnel or network mode)
-│   │   └── setup-vm.sh                # VM installer (provider-aware)
-│   ├── systemd/                       # User service files
-│   ├── dom0/
-│   │   ├── openclaw-tunnel@.service   # Systemd template: socat→qrexec tunnel
-│   │   ├── openclaw-tcp-forward       # Helper: qrexec-client wrapper
-│   │   └── openclaw.conf              # Config: which VM to tunnel to
-│   ├── vm/
-│   │   └── qubes.ConnectTCP           # Qrexec handler: TCP forwarding
-│   ├── policies/                      # Qrexec policy files
-│   ├── examples/                      # Provider config templates
-│   └── README.md                      # Detailed integration docs
-├── paper/
-│   ├── qubes-claw.tex                 # LaTeX source (TikZ diagrams, 50+ refs)
-│   ├── qubes-claw.pdf                 # Compiled paper (~7 pages)
-│   ├── posts.md                       # X/LinkedIn/Dev.to/HN/Reddit content
-│   ├── blog-qubes-claw.md             # Website-ready blog post
-│   ├── MANIFEST.md                    # Publication asset inventory
-│   └── Makefile                       # Build: make all (PDF + PNGs + sync)
-├── demo/
-│   ├── qubes-claw-demo                # Screenshot/recording toolkit
-│   ├── generate-diagrams.py           # Architecture diagram generator (Pillow)
-│   ├── generate-posts.py              # Social media card generator (Pillow)
-│   ├── architecture.png               # System architecture diagram
-│   ├── persistence.png                # Reboot persistence diagram
-│   └── security.png                   # Security layers diagram
-├── openclaw/                          # openclaw-cursor proxy (submodule)
-└── README.md                          # This file
+├── paper/                             # Academic publication
+│   ├── qubes-claw.tex                 #   LaTeX source (50+ refs, TikZ)
+│   ├── qubes-claw.pdf                 #   Compiled paper
+│   ├── blog-qubes-claw.md            #   Blog post
+│   ├── posts.md                       #   Social media content
+│   ├── MANIFEST.md                    #   Asset inventory
+│   └── Makefile                       #   make all | paper | diagrams | sync
+├── demo/                              # Diagrams and media
+│   ├── generate-diagrams.py           #   Architecture PNGs (Pillow)
+│   ├── generate-posts.py              #   Social media cards (Pillow)
+│   └── *.png                          #   Generated diagrams
+├── qubes-integration/                 # Deployment
+│   ├── scripts/                       #   setup-dom0.sh, setup-vm.sh
+│   ├── dom0/                          #   Tunnel services, configs
+│   ├── vm/                            #   ConnectTCP handler
+│   ├── policies/                      #   Qrexec policy files
+│   └── examples/                      #   Provider config templates
+└── openclaw/                          # LLM proxy (submodule)
 ```
 
-## Non-Qubes (Docker)
+## Related Work
 
-```bash
-cd openclaw
-docker compose up -d
-```
-
-## Publications
-
-The `paper/` directory contains a full academic paper and all associated marketing content. Run `make all` inside `paper/` to rebuild everything and sync to `~/Documents/qubes-claw/`.
-
-| Asset | File | Description |
-|-------|------|-------------|
-| Paper (PDF) | [`paper/qubes-claw.pdf`](paper/qubes-claw.pdf) | ~7 pages, 50+ references (2025 included) |
-| Blog post | [`paper/blog-qubes-claw.md`](paper/blog-qubes-claw.md) | Website-ready with frontmatter |
-| Social content | [`paper/posts.md`](paper/posts.md) | X, LinkedIn, Dev.to, HN, Reddit |
-| Architecture diagram | [`demo/architecture.png`](demo/architecture.png) | 1200x675, light academic palette |
-| Security diagram | [`demo/security.png`](demo/security.png) | Four-layer defense visualization |
-| Build guide | [`paper/MANIFEST.md`](paper/MANIFEST.md) | Complete asset inventory + deps |
-
-## Links
-
-- **OpenClaw docs:** [docs.openclaw.ai](https://docs.openclaw.ai/)
-- **Qubes integration details:** [`qubes-integration/README.md`](qubes-integration/README.md)
-- **Demo toolkit:** [`demo/README.md`](demo/README.md)
-- **qvm-remote** (VM→dom0 execution): [github.com/GabrieleRisso/qvm-remote](https://github.com/GabrieleRisso/qvm-remote)
-- **qubes-network-server:** [github.com/Rudd-O/qubes-network-server](https://github.com/Rudd-O/qubes-network-server)
+- **qvm-remote** -- Authenticated RPC for dom0 (bootstraps this infrastructure): [github.com/GabrieleRisso/qvm-remote](https://github.com/GabrieleRisso/qvm-remote)
+- **OpenClaw** -- Multi-provider LLM proxy: [docs.openclaw.ai](https://docs.openclaw.ai/)
+- **Qubes OS** -- Security-oriented operating system: [qubes-os.org](https://www.qubes-os.org/)
 
 ## Citation
 
-If you reference this work:
-
 ```bibtex
 @misc{risso2026qubesclaw,
-  author = {Risso, Gabriele},
-  title  = {qubes-claw: Secure, Isolated AI Agent Infrastructure on Qubes OS},
-  year   = {2026},
-  url    = {https://github.com/GabrieleRisso/qubes-claw}
+  author       = {Risso, Gabriele},
+  title        = {Hypervisor-Isolated Infrastructure for Autonomous {LLM} Agents on {Qubes OS}},
+  year         = {2026},
+  howpublished = {\url{https://github.com/GabrieleRisso/qubes-claw}},
+  note         = {Open-source framework. Paper: \texttt{paper/qubes-claw.pdf}}
 }
 ```
+
+## License
+
+GPL-2.0. See [LICENSE](LICENSE).
