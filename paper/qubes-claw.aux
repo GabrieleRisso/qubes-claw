@@ -1,0 +1,74 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{openai2024agents}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\newlabel{sec:intro}{{1}{1}{Introduction}{section.1}{}}
+\citation{rutkowska2010qubes}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Contributions}{2}{subsection.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Background}{2}{section.2}\protected@file@percent }
+\newlabel{sec:background}{{2}{2}{Background}{section.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Qubes OS and the Xen Security Model}{2}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}The Agent Trust Problem}{2}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Architecture}{2}{section.3}\protected@file@percent }
+\newlabel{sec:arch}{{3}{2}{Architecture}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Trust Domains}{2}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Qrexec Tunnel Design}{2}{subsection.3.2}\protected@file@percent }
+\newlabel{sec:tunnels}{{3.2}{2}{Qrexec Tunnel Design}{subsection.3.2}{}}
+\citation{sultan2019container}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces qubes-claw system architecture. Dashed blue arrows represent qrexec tunnels (Xen shared memory). The admin domain \texttt  {dom0} has no network interface; all communication uses \texttt  {vchan} pages managed by the hypervisor. The agent VM connects to LLM providers through standard HTTPS.}}{3}{figure.caption.1}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:architecture}{{1}{3}{qubes-claw system architecture. Dashed blue arrows represent qrexec tunnels (Xen shared memory). The admin domain \texttt {dom0} has no network interface; all communication uses \texttt {vchan} pages managed by the hypervisor. The agent VM connects to LLM providers through standard HTTPS}{figure.caption.1}{}}
+\newlabel{lst:tunnel}{{1}{3}{Dom0 tunnel service template (\texttt {systemd}). Each tunnel instance binds a local port and forwards through qrexec}{lstlisting.1}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1}{\ignorespaces Dom0 tunnel service template (\texttt  {systemd}). Each tunnel instance binds a local port and forwards through qrexec.}}{3}{lstlisting.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Multi-Provider Architecture}{3}{section.4}\protected@file@percent }
+\newlabel{sec:providers}{{4}{3}{Multi-Provider Architecture}{section.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Supported LLM providers and their characteristics.}}{3}{table.caption.2}\protected@file@percent }
+\newlabel{tab:providers}{{1}{3}{Supported LLM providers and their characteristics}{table.caption.2}{}}
+\newlabel{lst:config}{{2}{3}{Multi-provider configuration excerpt. API keys use environment variable placeholders and never appear in version control}{lstlisting.2}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {2}{\ignorespaces Multi-provider configuration excerpt. API keys use environment variable placeholders and never appear in version control.}}{3}{lstlisting.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Security Analysis}{3}{section.5}\protected@file@percent }
+\newlabel{sec:security}{{5}{3}{Security Analysis}{section.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Defense-in-depth: four independent security layers. Each layer can be breached without compromising the others.}}{4}{figure.caption.3}\protected@file@percent }
+\newlabel{fig:security}{{2}{4}{Defense-in-depth: four independent security layers. Each layer can be breached without compromising the others}{figure.caption.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Layer 1: Xen Hypervisor Isolation}{4}{subsection.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Layer 2: Qrexec Policy Engine}{4}{subsection.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Layer 3: Port Restrictions}{4}{subsection.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Layer 4: Gateway Token Authentication}{4}{subsection.5.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Threat Model}{4}{subsection.5.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Threat model: attack vectors and mitigations.}}{4}{table.caption.4}\protected@file@percent }
+\newlabel{tab:threats}{{2}{4}{Threat model: attack vectors and mitigations}{table.caption.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Implementation}{4}{section.6}\protected@file@percent }
+\newlabel{sec:impl}{{6}{4}{Implementation}{section.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Deployment Modes}{4}{subsection.6.1}\protected@file@percent }
+\citation{rutkowska2010qubes}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Reboot Persistence}{5}{subsection.6.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Boot sequence. Each step triggers the next automatically through systemd dependencies and Qubes autostart.}}{5}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:boot}{{3}{5}{Boot sequence. Each step triggers the next automatically through systemd dependencies and Qubes autostart}{figure.caption.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Reboot persistence: all components auto-start.}}{5}{table.caption.6}\protected@file@percent }
+\newlabel{tab:persistence}{{3}{5}{Reboot persistence: all components auto-start}{table.caption.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}One-Command Setup}{5}{subsection.6.3}\protected@file@percent }
+\newlabel{lst:setup}{{3}{5}{Complete deployment in two commands}{lstlisting.3}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {3}{\ignorespaces Complete deployment in two commands.}}{5}{lstlisting.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}Evaluation}{5}{section.7}\protected@file@percent }
+\newlabel{sec:eval}{{7}{5}{Evaluation}{section.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Latency Overhead}{5}{subsection.7.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces API call latency (median of 100 requests).}}{5}{table.caption.7}\protected@file@percent }
+\newlabel{tab:latency}{{4}{5}{API call latency (median of 100 requests)}{table.caption.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Resource Overhead}{5}{subsection.7.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.3}Comparison with Alternatives}{5}{subsection.7.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Comparison with alternative isolation approaches.}}{5}{table.caption.8}\protected@file@percent }
+\newlabel{tab:comparison}{{5}{5}{Comparison with alternative isolation approaches}{table.caption.8}{}}
+\citation{freedomofpress2023dangerzone}
+\citation{qubes2023splitgpg}
+\bibcite{rutkowska2010qubes}{1}
+\bibcite{openai2024agents}{2}
+\bibcite{sultan2019container}{3}
+\bibcite{freedomofpress2023dangerzone}{4}
+\bibcite{qubes2023splitgpg}{5}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Related Work}{6}{section.8}\protected@file@percent }
+\newlabel{sec:related}{{8}{6}{Related Work}{section.8}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {9}Conclusion}{6}{section.9}\protected@file@percent }
+\newlabel{sec:conclusion}{{9}{6}{Conclusion}{section.9}{}}
+\gdef \@abspage@last{6}
