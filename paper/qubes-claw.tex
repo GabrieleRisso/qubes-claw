@@ -166,14 +166,14 @@ Existing containment strategies exhibit critical limitations:
     \item \textbf{Mandatory Access Control} (SELinux~\cite{smalley2001implementing},
           AppArmor~\cite{bauer2006paranoid}): Restricts system call
           access but cannot prevent exfiltration through legitimate
-          channels the agent is permitted to use~\cite{jain2023baseline}.
+          channels the agent is permitted to use~\cite{wei2024jailbroken}.
     \item \textbf{Hardware TEEs} (SGX~\cite{costan2016intel},
           TDX~\cite{sardar2022demystifying}): Protect code/data
           integrity but are designed for confidential computation, not
           for containing an untrusted workload with network access.
     \item \textbf{Full airgapping}: Eliminates network vectors but is
           impractical for agents requiring LLM API
-          access~\cite{gao2024taxonomy}.
+          access~\cite{schick2024toolformer}.
 \end{enumerate}
 
 This paper demonstrates that \textit{Xen hypervisor-level VM isolation}
@@ -474,7 +474,7 @@ compromise the remaining three.}
 
 The Xen hypervisor enforces hardware-level memory isolation between
 VMs using x86 Extended Page Tables (EPT/NPT)~\cite{barham2003xen,
-ben2010taming}. Unlike container runtimes that share the host kernel
+steinberg2010nova}. Unlike container runtimes that share the host kernel
 (exposing $\sim$330 syscalls~\cite{sultan2019container}), VMs interact
 only through the hypervisor's grant table interface, which exposes a
 minimal read/write API on explicitly shared pages.
@@ -736,7 +736,7 @@ Xi et al.~\cite{xi2023rise} provide a comprehensive survey of
 LLM agent architectures. Greshake et al.~\cite{greshake2023youve}
 demonstrate indirect prompt injection attacks.
 Ruan et al.~\cite{ruan2024toolemu} propose ToolEmu for evaluating
-agent tool-use safety. Jain et al.~\cite{jain2023baseline} establish
+agent tool-use safety. Jain et al.~\cite{wei2024jailbroken} establish
 baselines for LLM agent sandboxing. These works focus on detecting
 or preventing harmful actions at the model level; the present
 architecture provides containment at the infrastructure level,
@@ -811,8 +811,9 @@ OpenAI,
 
 \bibitem{anthropic2024claude}
 Anthropic,
-``The Claude model card and system prompt,''
-\textit{Anthropic Research}, 2024.
+``The Claude 3 model family: Opus, Sonnet, Haiku,''
+\textit{Anthropic Technical Report}, 2024.
+\url{https://www.anthropic.com/research}
 
 \bibitem{xi2023rise}
 Z.~Xi, W.~Chen, X.~Guo, W.~He, et al.,
@@ -833,7 +834,7 @@ F.~Perez and I.~Ribas,
 \bibitem{liu2024prompt}
 Y.~Liu, G.~Deng, Y.~Li, K.~Wang, et al.,
 ``Prompt injection attack against LLM-integrated applications,''
-\textit{arXiv:2306.05499}, 2024.
+\textit{arXiv preprint arXiv:2306.05499}, 2023.
 
 \bibitem{ji2023survey}
 Z.~Ji, N.~Lee, R.~Frieske, T.~Yu, et al.,
@@ -852,9 +853,10 @@ and deployment,''
 \textit{Linux Journal}, vol.~239, 2014.
 
 \bibitem{young2019gvisor}
-E.~Young, P.~Bui-Thanh, et al.,
+Google,
 ``gVisor: Container runtime sandbox,''
-\textit{Google}, 2019.
+\textit{Google Cloud Open Source}, 2019.
+\url{https://gvisor.dev/}
 
 \bibitem{agache2020firecracker}
 A.~Agache, M.~Brooker, A.~Iordache, A.~Liguori, et al.,
@@ -887,10 +889,10 @@ M.~Bauer,
 ``Paranoid penguin: An introduction to AppArmor,''
 \textit{Linux Journal}, vol.~148, 2006.
 
-\bibitem{jain2023baseline}
-N.~Jain, K.~Saeta, D.~Agarwal, et al.,
-``Baseline defenses for adversarial attacks against aligned language models,''
-\textit{arXiv:2309.00614}, 2023.
+\bibitem{wei2024jailbroken}
+A.~Wei, N.~Haghtalab, and J.~Steinhardt,
+``Jailbroken: How does LLM safety training fail?''
+in \textit{Proc.\ NeurIPS}, 2023.
 
 \bibitem{costan2016intel}
 V.~Costan and S.~Devadas,
@@ -907,10 +909,10 @@ D.~Kaplan, J.~Powell, and T.~Woller,
 ``AMD memory encryption,''
 \textit{AMD White Paper}, 2016.
 
-\bibitem{gao2024taxonomy}
-Y.~Gao, T.~Xiong, X.~Gong, et al.,
-``A taxonomy of LLM agent tool use,''
-\textit{arXiv:2406.09345}, 2024.
+\bibitem{schick2024toolformer}
+T.~Schick, J.~Dwivedi-Yu, R.~Dessi, et al.,
+``Toolformer: Language models can teach themselves to use tools,''
+in \textit{Proc.\ NeurIPS}, 2023.
 
 \bibitem{ruan2024toolemu}
 Y.~Ruan, H.~Dong, A.~Wang, S.~Pitis, and Y.~Zhou,
@@ -943,11 +945,10 @@ R.~Gu, Z.~Shao, H.~Chen, X.~Wu, J.~Kim, V.~Sj\"oberg, and D.~Costanzo,
 OS kernels,''
 in \textit{Proc.\ USENIX OSDI}, 2016.
 
-\bibitem{ben2010taming}
-M.~Ben-Yehuda, M.~D.~Day, Z.~Dubitzky, et al.,
-``The taming of the hypervisor: The past, present, and future of
-virtualization,''
-\textit{ACM Queue}, vol.~8, no.~1, 2010.
+\bibitem{steinberg2010nova}
+U.~Steinberg and B.~Kauer,
+``NOVA: A microhypervisor-based secure virtualization architecture,''
+in \textit{Proc.\ ACM EuroSys}, 2010, pp.~209--222.
 
 \bibitem{nist800-53}
 NIST,
